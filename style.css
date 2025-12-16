@@ -118,6 +118,7 @@ button:hover {
   transform: translateY(-1px);
 }
 
+/* Botão excluir */
 .btn-delete {
   background: #dc2626;
   padding: 6px 10px;
@@ -126,6 +127,18 @@ button:hover {
 
 .btn-delete:hover {
   background: #b91c1c;
+}
+
+/* Botão editar (NOVO) */
+.btn-edit {
+  background: #2563eb;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  margin-right: 6px;
+}
+
+.btn-edit:hover {
+  background: #1e40af;
 }
 
 /* =====================================================
