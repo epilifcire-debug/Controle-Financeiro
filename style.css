@@ -1,4 +1,4 @@
-/* ================= RESET E BASE ================= */
+/* ================= RESET ================= */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -8,7 +8,8 @@
 
 body {
   background: #f4f6f8;
-  color: #333;
+  color: #2d3748;
+  transition: background 0.3s, color 0.3s;
 }
 
 /* ================= HEADER ================= */
@@ -17,11 +18,26 @@ header {
   color: #fff;
   padding: 1.5rem;
   text-align: center;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 header h1 {
   font-size: 2rem;
+}
+
+.theme-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  font-size: 1.1rem;
 }
 
 /* ================= MAIN ================= */
@@ -35,18 +51,18 @@ main {
 .input-section,
 .tabela,
 .backup {
-  background: #fff;
+  background: #ffffff;
   margin-bottom: 2rem;
   padding: 1.5rem;
-  border-radius: 14px;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+  border-radius: 16px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
 }
 
 .input-section h2,
 .tabela h2,
 .backup h2 {
-  margin-bottom: 1rem;
   color: #2c7a7b;
+  margin-bottom: 1rem;
 }
 
 /* ================= FORM ================= */
@@ -62,9 +78,8 @@ main {
   min-width: 160px;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid #cbd5e0;
   font-size: 0.95rem;
-  transition: 0.2s;
 }
 
 .form input:focus,
@@ -91,23 +106,24 @@ button:hover {
   transform: translateY(-1px);
 }
 
-/* ================= CARTÕES ================= */
+/* ================= LISTA DE CARTÕES ================= */
 #listaCartoes {
   margin-top: 1rem;
   list-style: none;
 }
 
 #listaCartoes li {
-  background: #f1f5f9;
-  padding: 10px 12px;
-  border-radius: 10px;
-  margin-bottom: 6px;
-  font-size: 0.95rem;
+  background: #edf2f7;
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin-bottom: 8px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  font-size: 0.95rem;
 }
 
-/* ================= RESUMO CARDS ================= */
+/* ================= CARDS ================= */
 .cards {
   display: flex;
   gap: 20px;
@@ -118,27 +134,34 @@ button:hover {
 .card {
   flex: 1;
   min-width: 260px;
-  padding: 1.5rem;
-  border-radius: 16px;
+  padding: 1.6rem;
+  border-radius: 18px;
   color: #fff;
   text-align: center;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+  box-shadow: 0 12px 22px rgba(0,0,0,0.18);
 }
 
 .card h3 {
   font-size: 1.1rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.6rem;
 }
 
 .card p {
-  font-size: 1.8rem;
+  font-size: 1.9rem;
   font-weight: bold;
 }
 
-/* Cores */
-.green { background: linear-gradient(135deg, #38a169, #2f855a); }
-.red   { background: linear-gradient(135deg, #e53e3e, #c53030); }
-.blue  { background: linear-gradient(135deg, #3182ce, #2b6cb0); }
+.green {
+  background: linear-gradient(135deg, #38a169, #2f855a);
+}
+
+.red {
+  background: linear-gradient(135deg, #e53e3e, #c53030);
+}
+
+.blue {
+  background: linear-gradient(135deg, #3182ce, #2b6cb0);
+}
 
 /* ================= GRÁFICOS ================= */
 .charts {
@@ -150,10 +173,46 @@ button:hover {
 }
 
 .chart-box {
-  background: #fff;
+  background: #ffffff;
   padding: 1rem;
-  border-radius: 16px;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+  border-radius: 18px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+}
+
+/* ================= DASHBOARD CARTÃO ================= */
+#cartaoDashboard {
+  margin-bottom: 1rem;
+}
+
+/* ================= FATURA ================= */
+#totalFatura {
+  margin: 1rem 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #2c7a7b;
+}
+
+/* ================= TIMELINE PARCELAS ================= */
+#timelineParcelas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+.timeline-item {
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: white;
+}
+
+.timeline-item.paga {
+  background: #38a169;
+}
+
+.timeline-item.pendente {
+  background: #e53e3e;
 }
 
 /* ================= TABELA ================= */
@@ -169,8 +228,7 @@ thead {
   color: #fff;
 }
 
-th,
-td {
+th, td {
   padding: 10px;
   text-align: center;
 }
@@ -180,17 +238,28 @@ tbody tr {
 }
 
 tbody tr:hover {
-  background: #f1f5f9;
+  background: #edf2f7;
 }
 
-td button {
+/* ================= BOTÕES AÇÃO ================= */
+.btn-edit {
   background: #3182ce;
   padding: 6px 10px;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 
-td button:hover {
+.btn-edit:hover {
   background: #2b6cb0;
+}
+
+.btn-delete {
+  background: #e53e3e;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+}
+
+.btn-delete:hover {
+  background: #c53030;
 }
 
 /* ================= BACKUP ================= */
@@ -204,13 +273,44 @@ td button:hover {
 
 /* ================= FOOTER ================= */
 footer {
-  text-align: center;
+  margin-top: 3rem;
   padding: 1.2rem;
+  text-align: center;
   background: #2c7a7b;
   color: #fff;
-  margin-top: 3rem;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+}
+
+/* ================= MODO ESCURO ================= */
+body.dark {
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+body.dark header,
+body.dark footer {
+  background: #020617;
+}
+
+body.dark .input-section,
+body.dark .tabela,
+body.dark .backup,
+body.dark .chart-box {
+  background: #020617;
+  color: #e5e7eb;
+}
+
+body.dark table thead {
+  background: #020617;
+}
+
+body.dark #listaCartoes li {
+  background: #020617;
+}
+
+body.dark tbody tr:hover {
+  background: #111827;
 }
 
 /* ================= RESPONSIVO ================= */
