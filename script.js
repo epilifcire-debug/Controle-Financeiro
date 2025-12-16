@@ -290,27 +290,41 @@ function exportarBackup() {
   a.click();
 }
 
-function importarBackup() {
-  const file = $("importFile").files[0];
-  if (!file) return alert("Selecione um arquivo.");
+function importarBackupArquivo(input) {
+  const file = input.files[0];
+  if (!file) return;
 
   const reader = new FileReader();
+
   reader.onload = e => {
-    const d = JSON.parse(e.target.result);
-    cartoes = d.cartoes || [];
-    lancamentos = d.lancamentos || [];
-    assinaturas = d.assinaturas || [];
-    rendaPrincipal = d.rendaPrincipal || {};
-    rendasExtras = d.rendasExtras || [];
+    try {
+      const data = JSON.parse(e.target.result);
 
-    localStorage.setItem("cartoes", JSON.stringify(cartoes));
-    localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
-    localStorage.setItem("assinaturas", JSON.stringify(assinaturas));
-    localStorage.setItem("rendaPrincipal", JSON.stringify(rendaPrincipal));
-    localStorage.setItem("rendasExtras", JSON.stringify(rendasExtras));
+      if (!data.cartoes) {
+        alert("Arquivo de backup inválido.");
+        return;
+      }
 
-    renderTudo();
+      cartoes        = data.cartoes || [];
+      lancamentos    = data.lancamentos || [];
+      assinaturas    = data.assinaturas || [];
+      rendaPrincipal = data.rendaPrincipal || {};
+      rendasExtras   = data.rendasExtras || [];
+
+      localStorage.setItem("cartoes", JSON.stringify(cartoes));
+      localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+      localStorage.setItem("assinaturas", JSON.stringify(assinaturas));
+      localStorage.setItem("rendaPrincipal", JSON.stringify(rendaPrincipal));
+      localStorage.setItem("rendasExtras", JSON.stringify(rendasExtras));
+
+      renderTudo();
+      alert("✅ Backup importado com sucesso!");
+    } catch (err) {
+      alert("❌ Erro ao importar backup.");
+      console.error(err);
+    }
   };
+
   reader.readAsText(file);
 }
 
@@ -342,3 +356,4 @@ window.importarBackup = importarBackup;
    INIT
 ====================================================== */
 renderTudo();
+
