@@ -1,102 +1,164 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
->
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>💰 Controle Financeiro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Estilo -->
   <link rel="stylesheet" href="style.css">
+
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
-  <header>
-    <h1>💰 Controle Financeiro</h1>
-    <div class="filters">
-      <label>Mês:
-        <select id="mesSelect">
-          <option>Janeiro</option><option>Fevereiro</option><option>Março</option>
-          <option>Abril</option><option>Maio</option><option>Junho</option>
-          <option>Julho</option><option>Agosto</option><option>Setembro</option>
-          <option>Outubro</option><option>Novembro</option><option>Dezembro</option>
-        </select>
-      </label>
-      <label>Ano:
-        <input type="number" id="anoInput" min="2020" value="2025">
-      </label>
+
+<header>
+  <h1>💰 Controle Financeiro</h1>
+</header>
+
+<main>
+
+  <!-- ================= CARTÕES ================= -->
+  <section class="input-section">
+    <h2>💳 Cadastro de Cartões</h2>
+
+    <div class="form">
+      <input
+        type="text"
+        id="cartaoNome"
+        placeholder="Nome do cartão (ex: Nubank)"
+      >
+
+      <input
+        type="number"
+        id="cartaoFechamento"
+        placeholder="Dia de fechamento"
+        min="1"
+        max="31"
+      >
+
+      <input
+        type="number"
+        id="cartaoVencimento"
+        placeholder="Dia de vencimento"
+        min="1"
+        max="31"
+      >
+
+      <button onclick="salvarCartao()">Salvar Cartão</button>
     </div>
-  </header>
 
-  <main>
-    <!-- 🔹 Novo Lançamento -->
-    <section class="input-section">
-      <h2>➕ Novo Lançamento</h2>
-      <div class="form">
-        <select id="tipo">
-          <option value="Renda">Renda</option>
-          <option value="Gasto">Gasto</option>
-          <option value="Investimento">Investimento</option>
-        </select>
-        <input type="text" id="categoria" placeholder="Categoria (ex: Alimentação, Caixinha)">
-        <input type="text" id="descricao" placeholder="Descrição">
-        <input type="number" id="valor" placeholder="Valor (R$)">
-        <button id="addBtn">💾 Adicionar</button>
-      </div>
-    </section>
+    <ul id="listaCartoes"></ul>
+  </section>
 
-    <!-- 🔹 Resumo Financeiro -->
-    <section class="cards">
-      <div class="card green">
-        <h3>💼 Renda Total</h3>
-        <p id="rendaTotal">R$ 0,00</p>
-      </div>
-      <div class="card red">
-        <h3>💸 Gastos + Investimentos</h3>
-        <p id="gastosTotal">R$ 0,00</p>
-      </div>
-      <div class="card blue">
-        <h3>💰 Sobra</h3>
-        <p id="sobra">R$ 0,00</p>
-      </div>
-    </section>
+  <!-- ================= LANÇAMENTOS ================= -->
+  <section class="input-section">
+    <h2>➕ Novo Lançamento</h2>
 
-    <!-- 🔹 Gráficos -->
-    <section class="charts">
-      <canvas id="barChart"></canvas>
-      <canvas id="pieChart"></canvas>
-    </section>
+    <div class="form">
+      <select id="tipo">
+        <option value="Renda">Renda</option>
+        <option value="Gasto">Gasto</option>
+        <option value="Investimento">Investimento</option>
+      </select>
 
-    <!-- 🔹 Tabela de lançamentos -->
-    <section class="tabela">
-      <h2>📋 Lançamentos</h2>
-      <table id="tabelaLancamentos">
-        <thead>
-          <tr>
-            <th>Tipo</th>
-            <th>Categoria</th>
-            <th>Descrição</th>
-            <th>Valor (R$)</th>
-            <th>Mês</th>
-            <th>Ano</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
+      <input
+        type="text"
+        id="categoria"
+        placeholder="Categoria (Alimentação, Caixinha, Saúde...)"
+      >
 
-    <!-- 🔹 Backup -->
-    <section class="backup">
-      <h2>💾 Backup</h2>
-      <button id="exportBtn">⬇️ Exportar</button>
-      <input type="file" id="importInput" accept=".json">
-      <button id="importBtn">⬆️ Importar</button>
-    </section>
-  </main>
+      <input
+        type="text"
+        id="descricao"
+        placeholder="Descrição"
+      >
 
-  <footer>
-    <p>Feito com 💚 por Eric Filipe | GitHub Pages</p>
-  </footer>
+      <input
+        type="number"
+        id="valor"
+        placeholder="Valor (R$)"
+        step="0.01"
+      >
 
-  <script src="script.js"></script>
+      <select id="cartaoSelect">
+        <option value="">Sem cartão</option>
+      </select>
+
+      <button onclick="salvarLancamento()">Salvar Lançamento</button>
+    </div>
+  </section>
+
+  <!-- ================= RESUMO ================= -->
+  <section class="cards">
+    <div class="card green">
+      <h3>💼 Renda</h3>
+      <p id="rendaEl">R$ 0,00</p>
+    </div>
+
+    <div class="card red">
+      <h3>💸 Gastos</h3>
+      <p id="gastosEl">R$ 0,00</p>
+    </div>
+
+    <div class="card blue">
+      <h3>💰 Sobra</h3>
+      <p id="sobraEl">R$ 0,00</p>
+    </div>
+  </section>
+
+  <!-- ================= GRÁFICOS ================= -->
+  <section class="charts">
+    <div class="chart-box">
+      <canvas id="barChart" width="360" height="260"></canvas>
+    </div>
+
+    <div class="chart-box">
+      <canvas id="pieChart" width="360" height="260"></canvas>
+    </div>
+  </section>
+
+  <!-- ================= TABELA ================= -->
+  <section class="tabela">
+    <h2>📋 Lançamentos</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Categoria</th>
+          <th>Descrição</th>
+          <th>Valor</th>
+          <th>Cartão</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+
+      <tbody id="tabela"></tbody>
+    </table>
+  </section>
+
+  <!-- ================= BACKUP ================= -->
+  <section class="backup">
+    <h2>💾 Backup dos Cartões</h2>
+
+    <button onclick="exportarBackup()">⬇️ Exportar Cartões</button>
+
+    <input type="file" id="importFile" accept=".json">
+
+    <button onclick="importarBackup()">⬆️ Importar Cartões</button>
+  </section>
+
+</main>
+
+<footer>
+  <p>Controle Financeiro • GitHub Pages</p>
+</footer>
+
+<!-- Script principal -->
+<script src="script.js"></script>
+
 </body>
 </html>
