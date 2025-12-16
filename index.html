@@ -172,15 +172,25 @@
   </section>
 
   <!-- BACKUP -->
-  <section class="backup">
-    <h2>💾 Backup</h2>
-    <div class="form">
-      <button onclick="exportarBackup()">⬇️ Exportar Backup</button>
-      <input type="file" id="importFile" accept=".json">
-      <button onclick="importarBackup()">⬆️ Importar Backup</button>
-    </div>
-  </section>
+<section class="backup">
+  <h2>💾 Backup</h2>
+  <div class="form">
+    <button type="button" onclick="exportarBackup()">⬇️ Exportar Backup</button>
 
+    <!-- input escondido -->
+    <input
+      type="file"
+      id="importFile"
+      accept=".json"
+      style="display:none"
+      onchange="importarBackupArquivo(this)"
+    >
+
+    <button type="button" onclick="document.getElementById('importFile').click()">
+      ⬆️ Importar Backup
+    </button>
+  </div>
+</section>
 </main>
 
 <footer>
@@ -190,3 +200,4 @@
 <script src="script.js" defer></script>
 </body>
 </html>
+
