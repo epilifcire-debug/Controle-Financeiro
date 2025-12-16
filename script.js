@@ -14,6 +14,39 @@ let anoAtivo = new Date().getFullYear();
 let barChart, pieChart, cartaoChart, assinaturaChart;
 
 /* ======================================================
+   ELEMENTOS DO DOM (CRÍTICO)
+====================================================== */
+const mesAtivoEl = document.getElementById("mesAtivo");
+const anoAtivoEl = document.getElementById("anoAtivo");
+
+const rendaPrincipalEl = document.getElementById("rendaPrincipal");
+const rendaEl = document.getElementById("rendaEl");
+const rendaExtraEl = document.getElementById("rendaExtraEl");
+const gastosEl = document.getElementById("gastosEl");
+const sobraEl = document.getElementById("sobraEl");
+
+const descricaoRendaExtra = document.getElementById("descricaoRendaExtra");
+const valorRendaExtra = document.getElementById("valorRendaExtra");
+const listaRendasExtras = document.getElementById("listaRendasExtras");
+
+const cartaoNome = document.getElementById("cartaoNome");
+const cartaoFechamento = document.getElementById("cartaoFechamento");
+const cartaoVencimento = document.getElementById("cartaoVencimento");
+const listaCartoes = document.getElementById("listaCartoes");
+
+const cartaoDashboard = document.getElementById("cartaoDashboard");
+const compraCartao = document.getElementById("compraCartao");
+const assinaturaCartao = document.getElementById("assinaturaCartao");
+const faturaCartao = document.getElementById("faturaCartao");
+
+const assinaturaDescricao = document.getElementById("assinaturaDescricao");
+const assinaturaValor = document.getElementById("assinaturaValor");
+const listaAssinaturas = document.getElementById("listaAssinaturas");
+
+const tabela = document.getElementById("tabela");
+const impactoAssinaturas = document.getElementById("impactoAssinaturas");
+
+/* ======================================================
    UTIL
 ====================================================== */
 function gerarId() {
@@ -30,18 +63,15 @@ if (localStorage.getItem("theme") === "dark") {
 }
 themeBtn.onclick = () => {
   document.body.classList.toggle("dark");
-  localStorage.setItem(
-    "theme",
-    document.body.classList.contains("dark") ? "dark" : "light"
-  );
+  localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
   themeBtn.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
 };
 
 /* ======================================================
    MÊS EM VIGÊNCIA
 ====================================================== */
-document.getElementById("mesAtivo").value = mesAtivo;
-document.getElementById("anoAtivo").value = anoAtivo;
+mesAtivoEl.value = mesAtivo;
+anoAtivoEl.value = anoAtivo;
 
 function atualizarMesAtivo() {
   mesAtivo = +mesAtivoEl.value;
@@ -148,7 +178,7 @@ function renderCartoes() {
 }
 
 /* ======================================================
-   LANÇAMENTO MANUAL
+   LANÇAMENTOS
 ====================================================== */
 function salvarLancamentoNormal(tipo, categoria, descricao, valor) {
   if (!descricao || !valor) return;
@@ -216,7 +246,8 @@ function salvarAssinatura() {
   });
 
   localStorage.setItem("assinaturas", JSON.stringify(assinaturas));
-  assinaturaDescricao.value = assinaturaValor.value = "";
+  assinaturaDescricao.value = "";
+  assinaturaValor.value = "";
   renderTudo();
 }
 
@@ -265,65 +296,87 @@ function renderAssinaturas() {
 }
 
 /* ======================================================
-   DASHBOARD & GRÁFICOS
+   DASHBOARD
 ====================================================== */
 function renderResumo() {
   const rendaBase = rendaPrincipal[`${mesAtivo}-${anoAtivo}`] || 0;
-  const rendaExtra = rendasExtras.filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo)
+
+  const rendaExtra = rendasExtras
+    .filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo)
     .reduce((a, b) => a + b.valor, 0);
 
-  const gastos = lancamentos.filter(l => l.mesRef === mesAtivo && l.anoRef === anoAtivo)
+  const gastos = lancamentos
+    .filter(l => l.mesRef === mesAtivo && l.anoRef === anoAtivo)
     .reduce((a, b) => a + b.valor, 0);
 
   rendaEl.textContent = `R$ ${rendaBase.toFixed(2)}`;
   rendaExtraEl.textContent = `R$ ${rendaExtra.toFixed(2)}`;
   gastosEl.textContent = `R$ ${gastos.toFixed(2)}`;
-  sobraEl.textContent = `R$ ${(rendaBase + rendaExtra - gastos).toFixed(2)}`;
 
-  renderGraficos(rendaBase, rendaExtra, gastos, rendaBase + rendaExtra - gastos);
+  const sobra = rendaBase + rendaExtra - gastos;
+  sobraEl.textContent = `R$ ${sobra.toFixed(2)}`;
+
+  renderGraficos(rendaBase, rendaExtra, gastos, sobra);
 }
 
+/* ======================================================
+   GRÁFICOS
+====================================================== */
 function renderGraficos(rb, re, g, s) {
   if (barChart) barChart.destroy();
   if (pieChart) pieChart.destroy();
 
-  barChart = new Chart(barChartCtx(), {
+  barChart = new Chart(document.getElementById("barChart"), {
     type: "bar",
     data: {
       labels: ["Renda", "Extra", "Gastos", "Sobra"],
-      datasets: [{ data: [rb, re, g, s], backgroundColor: ["#3182ce","#ecc94b","#e53e3e","#38a169"] }]
+      datasets: [{
+        data: [rb, re, g, s],
+        backgroundColor: ["#3182ce","#ecc94b","#e53e3e","#38a169"]
+      }]
     },
     options: { responsive: false, plugins: { legend: { display: false } } }
   });
 
-  pieChart = new Chart(pieChartCtx(), {
+  pieChart = new Chart(document.getElementById("pieChart"), {
     type: "pie",
     data: {
       labels: ["Gastos", "Sobra"],
-      datasets: [{ data: [g, s], backgroundColor: ["#e53e3e","#38a169"] }]
+      datasets: [{
+        data: [g, s],
+        backgroundColor: ["#e53e3e","#38a169"]
+      }]
     },
     options: { responsive: false }
   });
 }
 
 /* ======================================================
-   GRÁFICO ASSINATURAS + IMPACTO
+   ASSINATURAS – GRÁFICO E IMPACTO
 ====================================================== */
 function renderGraficoAssinaturas() {
   const dados = {};
-  lancamentos.filter(l => l.categoria === "Assinatura" && l.mesRef === mesAtivo && l.anoRef === anoAtivo)
+
+  lancamentos
+    .filter(l => l.categoria === "Assinatura" && l.mesRef === mesAtivo && l.anoRef === anoAtivo)
     .forEach(l => dados[l.descricao] = (dados[l.descricao] || 0) + l.valor);
 
   if (assinaturaChart) assinaturaChart.destroy();
-  assinaturaChart = new Chart(document.getElementById("assinaturaChart").getContext("2d"), {
+
+  assinaturaChart = new Chart(document.getElementById("assinaturaChart"), {
     type: "pie",
-    data: { labels: Object.keys(dados), datasets: [{ data: Object.values(dados) }] },
+    data: {
+      labels: Object.keys(dados),
+      datasets: [{ data: Object.values(dados) }]
+    },
     options: { responsive: false }
   });
 
   const totalAss = Object.values(dados).reduce((a, b) => a + b, 0);
   const rendaTotal = (rendaPrincipal[`${mesAtivo}-${anoAtivo}`] || 0) +
-    rendasExtras.filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo).reduce((a, b) => a + b.valor, 0);
+    rendasExtras
+      .filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo)
+      .reduce((a, b) => a + b.valor, 0);
 
   impactoAssinaturas.innerHTML = `
     Assinaturas: R$ ${totalAss.toFixed(2)}<br>
@@ -332,11 +385,12 @@ function renderGraficoAssinaturas() {
 }
 
 /* ======================================================
-   TABELA LANÇAMENTOS
+   TABELA
 ====================================================== */
 function renderTabela() {
   tabela.innerHTML = "";
-  lancamentos.filter(l => l.mesRef === mesAtivo && l.anoRef === anoAtivo)
+  lancamentos
+    .filter(l => l.mesRef === mesAtivo && l.anoRef === anoAtivo)
     .forEach(l => {
       const cartao = cartoes.find(c => c.id === l.cartaoId);
       tabela.innerHTML += `
@@ -361,13 +415,6 @@ function excluirLancamento(id) {
 /* ======================================================
    INIT
 ====================================================== */
-function barChartCtx() {
-  return document.getElementById("barChart").getContext("2d");
-}
-function pieChartCtx() {
-  return document.getElementById("pieChart").getContext("2d");
-}
-
 function renderTudo() {
   aplicarAssinaturasNoMes();
   renderRendasExtras();
