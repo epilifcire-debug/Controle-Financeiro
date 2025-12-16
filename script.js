@@ -1,8 +1,11 @@
 /* ======================================================
-   DADOS
+   ESTADO GLOBAL
 ====================================================== */
 let cartoes = JSON.parse(localStorage.getItem("cartoes")) || [];
 let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
+
+let mesAtivo = new Date().getMonth() + 1;
+let anoAtivo = new Date().getFullYear();
 
 let cartaoEditIndex = null;
 let lancamentoEditIndex = null;
@@ -10,7 +13,7 @@ let lancamentoEditIndex = null;
 let barChart, pieChart, cartaoChart;
 
 /* ======================================================
-   CORES
+   CORES PADRÃO
 ====================================================== */
 const CORES = {
   renda: "#3182ce",
@@ -19,10 +22,10 @@ const CORES = {
 };
 
 /* ======================================================
-   UTIL
+   UTILIDADES
 ====================================================== */
 function gerarId() {
-  return "c_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+  return "id_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
 }
 
 /* ======================================================
@@ -41,13 +44,29 @@ themeBtn.onclick = () => {
 };
 
 /* ======================================================
+   MÊS EM VIGÊNCIA
+====================================================== */
+document.getElementById("mesAtivo").value = mesAtivo;
+document.getElementById("anoAtivo").value = anoAtivo;
+
+function atualizarMesAtivo() {
+  mesAtivo = +document.getElementById("mesAtivo").value;
+  anoAtivo = +document.getElementById("anoAtivo").value;
+  renderTudo();
+}
+
+/* ======================================================
    CARTÕES
 ====================================================== */
 function salvarCartao() {
   const nome = cartaoNome.value.trim();
   const fechamento = +cartaoFechamento.value;
   const vencimento = +cartaoVencimento.value;
-  if (!nome || !fechamento || !vencimento) return alert("Dados do cartão incompletos");
+
+  if (!nome || !fechamento || !vencimento) {
+    alert("Preencha todos os dados do cartão");
+    return;
+  }
 
   if (cartaoEditIndex !== null) {
     Object.assign(cartoes[cartaoEditIndex], { nome, fechamento, vencimento });
@@ -70,9 +89,11 @@ function editarCartao(i) {
 }
 
 function excluirCartao(id) {
-  if (lancamentos.some(l => l.cartaoId === id))
-    return alert("Cartão possui lançamentos e não pode ser excluído");
-  if (!confirm("Excluir cartão?")) return;
+  if (lancamentos.some(l => l.cartaoId === id)) {
+    alert("Este cartão possui lançamentos e não pode ser excluído.");
+    return;
+  }
+  if (!confirm("Deseja excluir este cartão?")) return;
   cartoes = cartoes.filter(c => c.id !== id);
   localStorage.setItem("cartoes", JSON.stringify(cartoes));
   renderTudo();
@@ -80,7 +101,7 @@ function excluirCartao(id) {
 
 function renderCartoes() {
   listaCartoes.innerHTML = "";
-  cartaoDashboard.innerHTML = "<option value=''>Todos</option>";
+  cartaoDashboard.innerHTML = "<option value=''>Todos os cartões</option>";
   faturaCartao.innerHTML = "<option value=''>Selecione</option>";
   compraCartao.innerHTML = "<option value=''>Selecione</option>";
 
@@ -92,7 +113,8 @@ function renderCartoes() {
           <button class="btn-edit" onclick="editarCartao(${i})">✏️</button>
           <button class="btn-delete" onclick="excluirCartao('${c.id}')">🗑️</button>
         </span>
-      </li>`;
+      </li>
+    `;
     cartaoDashboard.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
     faturaCartao.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
     compraCartao.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
@@ -103,42 +125,53 @@ function renderCartoes() {
    LANÇAMENTO NORMAL
 ====================================================== */
 function salvarLancamentoNormal(tipo, categoria, descricao, valor) {
+  if (!descricao || !valor) return;
+
   lancamentos.push({
+    id: gerarId(),
     tipo,
     categoria,
     descricao,
     valor,
-    data: new Date().toISOString()
+    mesRef: mesAtivo,
+    anoRef: anoAtivo
   });
+
   localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
   renderTudo();
 }
 
 /* ======================================================
-   PARCELAMENTO COM MÊS INICIAL
+   COMPRA PARCELADA
 ====================================================== */
 function registrarCompraParcelada(cartaoId, descricao, valorTotal, parcelas, mesInicial, anoInicial) {
-  const cartao = cartoes.find(c => c.id === cartaoId);
-  if (!cartao) return;
+  if (!cartaoId || !descricao || !valorTotal || !parcelas || !mesInicial || !anoInicial) {
+    alert("Preencha todos os dados da compra parcelada");
+    return;
+  }
 
   const valorParcela = +(valorTotal / parcelas).toFixed(2);
 
   for (let i = 1; i <= parcelas; i++) {
     let mes = mesInicial + (i - 1);
     let ano = anoInicial;
+
     if (mes > 12) {
       ano += Math.floor((mes - 1) / 12);
       mes = ((mes - 1) % 12) + 1;
     }
 
     lancamentos.push({
+      id: gerarId(),
       tipo: "Gasto",
       categoria: "Cartão",
-      descricao: `${descricao} — ${parcelas}x de R$ ${valorParcela.toFixed(2)} (${i}/${parcelas})`,
+      descricao,
       valor: valorParcela,
+      parcelaAtual: i,
+      totalParcelas: parcelas,
       cartaoId,
-      mesFatura: mes,
-      anoFatura: ano
+      mesRef: mes,
+      anoRef: ano
     });
   }
 
@@ -147,112 +180,141 @@ function registrarCompraParcelada(cartaoId, descricao, valorTotal, parcelas, mes
 }
 
 /* ======================================================
-   TABELA LANÇAMENTOS (TODOS)
+   TABELA DE LANÇAMENTOS (MÊS ATIVO)
 ====================================================== */
 function renderTabela() {
   tabela.innerHTML = "";
-  lancamentos.forEach((l, i) => {
-    const cartao = cartoes.find(c => c.id === l.cartaoId);
-    tabela.innerHTML += `
-      <tr>
-        <td>${l.tipo}</td>
-        <td>${l.categoria || "-"}</td>
-        <td>${l.descricao}</td>
-        <td>R$ ${l.valor.toFixed(2)}</td>
-        <td>${cartao ? cartao.nome : "-"}</td>
-        <td><button class="btn-edit" onclick="editarLancamento(${i})">✏️</button></td>
-      </tr>`;
-  });
+
+  lancamentos
+    .filter(l => l.mesRef === mesAtivo && l.anoRef === anoAtivo)
+    .forEach(l => {
+      const cartao = cartoes.find(c => c.id === l.cartaoId);
+      tabela.innerHTML += `
+        <tr>
+          <td>${l.tipo}</td>
+          <td>${l.categoria || "-"}</td>
+          <td>
+            ${l.descricao}
+            ${l.totalParcelas ? `(${l.parcelaAtual}/${l.totalParcelas})` : ""}
+          </td>
+          <td>R$ ${l.valor.toFixed(2)}</td>
+          <td>${cartao ? cartao.nome : "-"}</td>
+          <td>
+            <button class="btn-delete" onclick="excluirLancamento('${l.id}')">🗑️</button>
+          </td>
+        </tr>
+      `;
+    });
 }
 
-function editarLancamento(i) {
-  const l = lancamentos[i];
-  alert("Edição simples: apague e recadastre se necessário.\n(Funcionalidade pode ser expandida)");
+function excluirLancamento(id) {
+  if (!confirm("Excluir lançamento?")) return;
+  lancamentos = lancamentos.filter(l => l.id !== id);
+  localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+  renderTudo();
 }
 
 /* ======================================================
    DASHBOARD GERAL
 ====================================================== */
 function renderResumo() {
-  const renda = lancamentos.filter(l => l.tipo === "Renda").reduce((a,b)=>a+b.valor,0);
-  const gastos = lancamentos.filter(l => l.tipo !== "Renda").reduce((a,b)=>a+b.valor,0);
+  const renda = lancamentos
+    .filter(l => l.tipo === "Renda" && l.mesRef === mesAtivo && l.anoRef === anoAtivo)
+    .reduce((a, b) => a + b.valor, 0);
+
+  const gastos = lancamentos
+    .filter(l => l.tipo !== "Renda" && l.mesRef === mesAtivo && l.anoRef === anoAtivo)
+    .reduce((a, b) => a + b.valor, 0);
 
   rendaEl.textContent = `R$ ${renda.toFixed(2)}`;
   gastosEl.textContent = `R$ ${gastos.toFixed(2)}`;
-  sobraEl.textContent = `R$ ${(renda-gastos).toFixed(2)}`;
+  sobraEl.textContent = `R$ ${(renda - gastos).toFixed(2)}`;
 
-  renderGraficos(renda, gastos, renda-gastos);
+  renderGraficos(renda, gastos, renda - gastos);
 }
 
-function renderGraficos(r,g,s){
-  if(barChart) barChart.destroy();
-  if(pieChart) pieChart.destroy();
+function renderGraficos(r, g, s) {
+  if (barChart) barChart.destroy();
+  if (pieChart) pieChart.destroy();
 
-  barChart = new Chart(barChartCtx(),{
-    type:"bar",
-    data:{labels:["Renda","Gastos","Sobra"],
-      datasets:[{data:[r,g,s],backgroundColor:[CORES.renda,CORES.gasto,CORES.sobra]}]},
-    options:{responsive:false}
+  barChart = new Chart(barChartCtx(), {
+    type: "bar",
+    data: {
+      labels: ["Renda", "Gastos", "Sobra"],
+      datasets: [{
+        data: [r, g, s],
+        backgroundColor: [CORES.renda, CORES.gasto, CORES.sobra]
+      }]
+    },
+    options: { responsive: false, plugins: { legend: { display: false } } }
   });
 
-  pieChart = new Chart(pieChartCtx(),{
-    type:"pie",
-    data:{labels:["Gastos","Sobra"],
-      datasets:[{data:[g,s],backgroundColor:[CORES.gasto,CORES.sobra]}]},
-    options:{responsive:false}
+  pieChart = new Chart(pieChartCtx(), {
+    type: "pie",
+    data: {
+      labels: ["Gastos", "Sobra"],
+      datasets: [{
+        data: [g, s],
+        backgroundColor: [CORES.gasto, CORES.sobra]
+      }]
+    },
+    options: { responsive: false }
   });
 }
 
 /* ======================================================
-   DASHBOARD CARTÕES (TODOS OU UM)
+   DASHBOARD DE CARTÕES
 ====================================================== */
-cartaoDashboard.onchange = () => {
-  const id = cartaoDashboard.value;
+cartaoDashboard.onchange = renderDashboardCartoes;
+
+function renderDashboardCartoes() {
   const dados = {};
 
-  lancamentos.forEach(l => {
-    if (l.cartaoId) {
-      if (!id || l.cartaoId === id) {
-        const nome = cartoes.find(c => c.id === l.cartaoId)?.nome || "Outro";
-        dados[nome] = (dados[nome] || 0) + l.valor;
-      }
-    }
-  });
+  lancamentos
+    .filter(l => l.mesRef === mesAtivo && l.anoRef === anoAtivo && l.cartaoId)
+    .forEach(l => {
+      const nome = cartoes.find(c => c.id === l.cartaoId)?.nome || "Outro";
+      dados[nome] = (dados[nome] || 0) + l.valor;
+    });
 
   if (cartaoChart) cartaoChart.destroy();
-  cartaoChart = new Chart(document.getElementById("cartaoChart"),{
-    type:"pie",
-    data:{labels:Object.keys(dados),
-      datasets:[{data:Object.values(dados)}]},
-    options:{responsive:false}
-  });
-};
+
+  cartaoChart = new Chart(
+    document.getElementById("cartaoChart").getContext("2d"),
+    {
+      type: "pie",
+      data: {
+        labels: Object.keys(dados),
+        datasets: [{ data: Object.values(dados) }]
+      },
+      options: { responsive: false }
+    }
+  );
+}
 
 /* ======================================================
-   FATURA
+   FATURA MENSAL
 ====================================================== */
 function renderFatura() {
-  const cartaoId = faturaCartao.value;
-  const mes = +faturaMes.value;
-  const ano = +faturaAno.value;
   tabelaFatura.innerHTML = "";
-  timelineParcelas.innerHTML = "";
-
   let total = 0;
-  const hoje = new Date();
 
-  lancamentos.filter(l =>
-    l.cartaoId === cartaoId &&
-    l.mesFatura === mes &&
-    l.anoFatura === ano
-  ).forEach(l => {
-    total += l.valor;
-    tabelaFatura.innerHTML += `
-      <tr>
-        <td>${l.descricao}</td>
-        <td>R$ ${l.valor.toFixed(2)}</td>
-      </tr>`;
-  });
+  lancamentos
+    .filter(l =>
+      l.cartaoId === faturaCartao.value &&
+      l.mesRef === +faturaMes.value &&
+      l.anoRef === +faturaAno.value
+    )
+    .forEach(l => {
+      total += l.valor;
+      tabelaFatura.innerHTML += `
+        <tr>
+          <td>${l.descricao}</td>
+          <td>${l.parcelaAtual}/${l.totalParcelas}</td>
+          <td>R$ ${l.valor.toFixed(2)}</td>
+        </tr>
+      `;
+    });
 
   totalFatura.textContent = `Total: R$ ${total.toFixed(2)}`;
 }
@@ -260,13 +322,18 @@ function renderFatura() {
 /* ======================================================
    INIT
 ====================================================== */
-function barChartCtx(){return document.getElementById("barChart").getContext("2d")}
-function pieChartCtx(){return document.getElementById("pieChart").getContext("2d")}
+function barChartCtx() {
+  return document.getElementById("barChart").getContext("2d");
+}
+function pieChartCtx() {
+  return document.getElementById("pieChart").getContext("2d");
+}
 
-function renderTudo(){
+function renderTudo() {
   renderCartoes();
-  renderResumo();
   renderTabela();
+  renderResumo();
+  renderDashboardCartoes();
 }
 
 renderTudo();
