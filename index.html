@@ -44,7 +44,7 @@
         <option value="12">Dezembro</option>
       </select>
       <input id="anoAtivo" type="number" placeholder="Ano">
-      <button onclick="atualizarMesAtivo()">Aplicar</button>
+      <button type="button" onclick="atualizarMesAtivo()">Aplicar</button>
     </div>
   </section>
 
@@ -53,14 +53,14 @@
     <h2>💼 Renda do Mês</h2>
     <div class="form">
       <input id="rendaPrincipal" type="number" placeholder="Renda principal">
-      <button onclick="salvarRendaPrincipal()">Salvar Renda</button>
+      <button type="button" onclick="salvarRendaPrincipal()">Salvar Renda</button>
     </div>
 
     <h3 style="margin-top:1rem;">➕ Rendas Extras</h3>
     <div class="form">
       <input id="descricaoRendaExtra" placeholder="Descrição da renda extra">
       <input id="valorRendaExtra" type="number" placeholder="Valor">
-      <button onclick="adicionarRendaExtra()">Adicionar</button>
+      <button type="button" onclick="adicionarRendaExtra()">Adicionar</button>
     </div>
 
     <ul id="listaRendasExtras"></ul>
@@ -89,7 +89,7 @@
     </div>
   </section>
 
-  <!-- ================= GRÁFICOS GERAIS ================= -->
+  <!-- ================= GRÁFICOS ================= -->
   <section class="charts">
     <div class="chart-box">
       <canvas id="barChart" width="360" height="260"></canvas>
@@ -119,12 +119,10 @@
     <h2>💳 Cartões</h2>
     <div class="form">
       <input id="cartaoNome" placeholder="Nome do cartão">
-      <input id="cartaoFechamento" type="number" min="1" max="31" placeholder="Dia de fechamento">
-      <input id="cartaoVencimento" type="number" min="1" max="31" placeholder="Dia de vencimento">
-      <button type="button" onclick="salvarCartao()">Salvar</button>
+      <input id="cartaoFechamento" type="number" min="1" max="31" placeholder="Fechamento">
+      <input id="cartaoVencimento" type="number" min="1" max="31" placeholder="Vencimento">
+      <button type="button" onclick="salvarCartao()">Salvar / Atualizar</button>
     </div>
-
-    <!-- Lista com botões Editar / Excluir (gerados pelo JS) -->
     <ul id="listaCartoes"></ul>
   </section>
 
@@ -138,7 +136,7 @@
       <input id="compraParcelas" type="number" placeholder="Parcelas">
       <input id="compraMes" type="number" min="1" max="12" placeholder="Mês inicial">
       <input id="compraAno" type="number" placeholder="Ano inicial">
-      <button onclick="
+      <button type="button" onclick="
         registrarCompraParcelada(
           compraCartao.value,
           compraDescricao.value,
@@ -155,10 +153,10 @@
   <section class="input-section">
     <h2>🔁 Assinaturas</h2>
     <div class="form">
-      <input id="assinaturaDescricao" placeholder="Descrição (Netflix, Spotify)">
-      <input id="assinaturaValor" type="number" step="0.01" placeholder="Valor mensal">
+      <input id="assinaturaDescricao" placeholder="Descrição">
+      <input id="assinaturaValor" type="number" placeholder="Valor">
       <select id="assinaturaCartao"></select>
-      <button onclick="salvarAssinatura()">Salvar Assinatura</button>
+      <button type="button" onclick="salvarAssinatura()">Salvar Assinatura</button>
     </div>
     <ul id="listaAssinaturas"></ul>
   </section>
@@ -192,8 +190,18 @@
     </table>
   </section>
 
+  <!-- ================= BACKUP ================= -->
+  <section class="backup">
+    <h2>💾 Backup</h2>
+    <div class="form">
+      <button type="button" onclick="exportarBackup()">⬇️ Exportar Backup</button>
+      <input type="file" id="importFile" accept=".json">
+      <button type="button" onclick="importarBackup()">⬆️ Importar Backup</button>
+    </div>
+  </section>
+
   <!-- ================= FATURA (ESTRUTURAL / OCULTA) ================= -->
-  <section class="input-section" style="display:none">
+  <section style="display:none">
     <select id="faturaCartao"></select>
   </section>
 
@@ -203,8 +211,7 @@
   <p>Controle Financeiro • GitHub Pages</p>
 </footer>
 
-<!-- Script carregado após o HTML -->
+<!-- Script -->
 <script src="script.js" defer></script>
 </body>
 </html>
-
