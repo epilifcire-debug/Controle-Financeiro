@@ -58,7 +58,8 @@ main {
    SEÇÕES
 ===================================================== */
 .input-section,
-.tabela {
+.tabela,
+.backup {
   background: #ffffff;
   padding: 1.5rem;
   border-radius: 18px;
@@ -67,7 +68,8 @@ main {
 }
 
 .input-section h2,
-.tabela h2 {
+.tabela h2,
+.backup h2 {
   margin-bottom: 1rem;
   color: #1e40af;
   font-size: 1.25rem;
@@ -80,6 +82,7 @@ main {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+  align-items: center;
 }
 
 .form input,
@@ -90,6 +93,7 @@ main {
   border-radius: 12px;
   border: 1px solid #cbd5e1;
   font-size: 0.95rem;
+  background: #ffffff;
 }
 
 .form input:focus,
@@ -97,6 +101,12 @@ main {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 2px rgba(37,99,235,0.25);
+}
+
+/* input file (backup) */
+.form input[type="file"] {
+  padding: 8px;
+  background: #f8fafc;
 }
 
 /* =====================================================
@@ -129,7 +139,7 @@ button:hover {
   background: #b91c1c;
 }
 
-/* Botão editar (NOVO) */
+/* Botão editar */
 .btn-edit {
   background: #2563eb;
   padding: 6px 10px;
@@ -238,7 +248,7 @@ button:hover {
 }
 
 /* =====================================================
-   IMPACTO DAS ASSINATURAS
+   IMPACTO ASSINATURAS
 ===================================================== */
 #impactoAssinaturas {
   margin-top: 1rem;
@@ -304,6 +314,7 @@ body.dark footer {
 
 body.dark .input-section,
 body.dark .tabela,
+body.dark .backup,
 body.dark .chart-box {
   background: #020617;
   color: #e5e7eb;
@@ -328,6 +339,14 @@ body.dark tbody tr:hover {
 
 body.dark #impactoAssinaturas {
   background: #020617;
+}
+
+body.dark .form input,
+body.dark .form select,
+body.dark .form input[type="file"] {
+  background: #020617;
+  color: #e5e7eb;
+  border-color: #334155;
 }
 
 /* =====================================================
