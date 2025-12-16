@@ -4,25 +4,27 @@
 let cartoes = JSON.parse(localStorage.getItem("cartoes")) || [];
 let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
 
+let rendaPrincipal = JSON.parse(localStorage.getItem("rendaPrincipal")) || {};
+let rendasExtras = JSON.parse(localStorage.getItem("rendasExtras")) || [];
+
 let mesAtivo = new Date().getMonth() + 1;
 let anoAtivo = new Date().getFullYear();
 
 let cartaoEditIndex = null;
-let lancamentoEditIndex = null;
-
 let barChart, pieChart, cartaoChart;
 
 /* ======================================================
-   CORES PADRÃO
+   CORES
 ====================================================== */
 const CORES = {
   renda: "#3182ce",
+  rendaExtra: "#ecc94b",
   gasto: "#e53e3e",
   sobra: "#38a169"
 };
 
 /* ======================================================
-   UTILIDADES
+   UTIL
 ====================================================== */
 function gerarId() {
   return "id_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
@@ -56,17 +58,63 @@ function atualizarMesAtivo() {
 }
 
 /* ======================================================
+   RENDA
+====================================================== */
+function salvarRendaPrincipal() {
+  const valor = +document.getElementById("rendaPrincipal").value;
+  if (!valor) return;
+
+  rendaPrincipal[`${mesAtivo}-${anoAtivo}`] = valor;
+  localStorage.setItem("rendaPrincipal", JSON.stringify(rendaPrincipal));
+  renderTudo();
+}
+
+function adicionarRendaExtra() {
+  const desc = descricaoRendaExtra.value;
+  const valor = +valorRendaExtra.value;
+  if (!desc || !valor) return;
+
+  rendasExtras.push({
+    id: gerarId(),
+    descricao: desc,
+    valor,
+    mesRef: mesAtivo,
+    anoRef: anoAtivo
+  });
+
+  localStorage.setItem("rendasExtras", JSON.stringify(rendasExtras));
+  descricaoRendaExtra.value = "";
+  valorRendaExtra.value = "";
+  renderTudo();
+}
+
+function excluirRendaExtra(id) {
+  rendasExtras = rendasExtras.filter(r => r.id !== id);
+  localStorage.setItem("rendasExtras", JSON.stringify(rendasExtras));
+  renderTudo();
+}
+
+function renderRendasExtras() {
+  listaRendasExtras.innerHTML = "";
+  rendasExtras
+    .filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo)
+    .forEach(r => {
+      listaRendasExtras.innerHTML += `
+        <li>
+          ${r.descricao} — R$ ${r.valor.toFixed(2)}
+          <button class="btn-delete" onclick="excluirRendaExtra('${r.id}')">🗑️</button>
+        </li>`;
+    });
+}
+
+/* ======================================================
    CARTÕES
 ====================================================== */
 function salvarCartao() {
   const nome = cartaoNome.value.trim();
   const fechamento = +cartaoFechamento.value;
   const vencimento = +cartaoVencimento.value;
-
-  if (!nome || !fechamento || !vencimento) {
-    alert("Preencha todos os dados do cartão");
-    return;
-  }
+  if (!nome || !fechamento || !vencimento) return;
 
   if (cartaoEditIndex !== null) {
     Object.assign(cartoes[cartaoEditIndex], { nome, fechamento, vencimento });
@@ -90,10 +138,10 @@ function editarCartao(i) {
 
 function excluirCartao(id) {
   if (lancamentos.some(l => l.cartaoId === id)) {
-    alert("Este cartão possui lançamentos e não pode ser excluído.");
+    alert("Cartão possui lançamentos");
     return;
   }
-  if (!confirm("Deseja excluir este cartão?")) return;
+  if (!confirm("Excluir cartão?")) return;
   cartoes = cartoes.filter(c => c.id !== id);
   localStorage.setItem("cartoes", JSON.stringify(cartoes));
   renderTudo();
@@ -101,20 +149,19 @@ function excluirCartao(id) {
 
 function renderCartoes() {
   listaCartoes.innerHTML = "";
-  cartaoDashboard.innerHTML = "<option value=''>Todos os cartões</option>";
+  cartaoDashboard.innerHTML = "<option value=''>Todos</option>";
   faturaCartao.innerHTML = "<option value=''>Selecione</option>";
   compraCartao.innerHTML = "<option value=''>Selecione</option>";
 
   cartoes.forEach((c, i) => {
     listaCartoes.innerHTML += `
       <li>
-        💳 ${c.nome} (fecha ${c.fechamento})
+        💳 ${c.nome}
         <span>
           <button class="btn-edit" onclick="editarCartao(${i})">✏️</button>
           <button class="btn-delete" onclick="excluirCartao('${c.id}')">🗑️</button>
         </span>
-      </li>
-    `;
+      </li>`;
     cartaoDashboard.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
     faturaCartao.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
     compraCartao.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
@@ -145,17 +192,11 @@ function salvarLancamentoNormal(tipo, categoria, descricao, valor) {
    COMPRA PARCELADA
 ====================================================== */
 function registrarCompraParcelada(cartaoId, descricao, valorTotal, parcelas, mesInicial, anoInicial) {
-  if (!cartaoId || !descricao || !valorTotal || !parcelas || !mesInicial || !anoInicial) {
-    alert("Preencha todos os dados da compra parcelada");
-    return;
-  }
-
   const valorParcela = +(valorTotal / parcelas).toFixed(2);
 
   for (let i = 1; i <= parcelas; i++) {
     let mes = mesInicial + (i - 1);
     let ano = anoInicial;
-
     if (mes > 12) {
       ano += Math.floor((mes - 1) / 12);
       mes = ((mes - 1) % 12) + 1;
@@ -180,11 +221,10 @@ function registrarCompraParcelada(cartaoId, descricao, valorTotal, parcelas, mes
 }
 
 /* ======================================================
-   TABELA DE LANÇAMENTOS (MÊS ATIVO)
+   TABELA DE LANÇAMENTOS
 ====================================================== */
 function renderTabela() {
   tabela.innerHTML = "";
-
   lancamentos
     .filter(l => l.mesRef === mesAtivo && l.anoRef === anoAtivo)
     .forEach(l => {
@@ -193,17 +233,13 @@ function renderTabela() {
         <tr>
           <td>${l.tipo}</td>
           <td>${l.categoria || "-"}</td>
-          <td>
-            ${l.descricao}
-            ${l.totalParcelas ? `(${l.parcelaAtual}/${l.totalParcelas})` : ""}
-          </td>
+          <td>${l.descricao} ${l.totalParcelas ? `(${l.parcelaAtual}/${l.totalParcelas})` : ""}</td>
           <td>R$ ${l.valor.toFixed(2)}</td>
           <td>${cartao ? cartao.nome : "-"}</td>
           <td>
             <button class="btn-delete" onclick="excluirLancamento('${l.id}')">🗑️</button>
           </td>
-        </tr>
-      `;
+        </tr>`;
     });
 }
 
@@ -218,32 +254,42 @@ function excluirLancamento(id) {
    DASHBOARD GERAL
 ====================================================== */
 function renderResumo() {
-  const renda = lancamentos
-    .filter(l => l.tipo === "Renda" && l.mesRef === mesAtivo && l.anoRef === anoAtivo)
+  const rendaBase = rendaPrincipal[`${mesAtivo}-${anoAtivo}`] || 0;
+
+  const rendaExtra = rendasExtras
+    .filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo)
     .reduce((a, b) => a + b.valor, 0);
 
   const gastos = lancamentos
     .filter(l => l.tipo !== "Renda" && l.mesRef === mesAtivo && l.anoRef === anoAtivo)
     .reduce((a, b) => a + b.valor, 0);
 
-  rendaEl.textContent = `R$ ${renda.toFixed(2)}`;
+  rendaEl.textContent = `R$ ${rendaBase.toFixed(2)}`;
+  rendaExtraEl.textContent = `R$ ${rendaExtra.toFixed(2)}`;
   gastosEl.textContent = `R$ ${gastos.toFixed(2)}`;
-  sobraEl.textContent = `R$ ${(renda - gastos).toFixed(2)}`;
 
-  renderGraficos(renda, gastos, renda - gastos);
+  const sobra = rendaBase + rendaExtra - gastos;
+  sobraEl.textContent = `R$ ${sobra.toFixed(2)}`;
+
+  renderGraficos(rendaBase, rendaExtra, gastos, sobra);
 }
 
-function renderGraficos(r, g, s) {
+function renderGraficos(rb, re, g, s) {
   if (barChart) barChart.destroy();
   if (pieChart) pieChart.destroy();
 
   barChart = new Chart(barChartCtx(), {
     type: "bar",
     data: {
-      labels: ["Renda", "Gastos", "Sobra"],
+      labels: ["Renda", "Renda Extra", "Gastos", "Sobra"],
       datasets: [{
-        data: [r, g, s],
-        backgroundColor: [CORES.renda, CORES.gasto, CORES.sobra]
+        data: [rb, re, g, s],
+        backgroundColor: [
+          CORES.renda,
+          CORES.rendaExtra,
+          CORES.gasto,
+          CORES.sobra
+        ]
       }]
     },
     options: { responsive: false, plugins: { legend: { display: false } } }
@@ -263,22 +309,20 @@ function renderGraficos(r, g, s) {
 }
 
 /* ======================================================
-   DASHBOARD DE CARTÕES
+   DASHBOARD CARTÕES
 ====================================================== */
 cartaoDashboard.onchange = renderDashboardCartoes;
 
 function renderDashboardCartoes() {
   const dados = {};
-
   lancamentos
-    .filter(l => l.mesRef === mesAtivo && l.anoRef === anoAtivo && l.cartaoId)
+    .filter(l => l.cartaoId && l.mesRef === mesAtivo && l.anoRef === anoAtivo)
     .forEach(l => {
       const nome = cartoes.find(c => c.id === l.cartaoId)?.nome || "Outro";
       dados[nome] = (dados[nome] || 0) + l.valor;
     });
 
   if (cartaoChart) cartaoChart.destroy();
-
   cartaoChart = new Chart(
     document.getElementById("cartaoChart").getContext("2d"),
     {
@@ -293,7 +337,7 @@ function renderDashboardCartoes() {
 }
 
 /* ======================================================
-   FATURA MENSAL
+   FATURA
 ====================================================== */
 function renderFatura() {
   tabelaFatura.innerHTML = "";
@@ -312,8 +356,7 @@ function renderFatura() {
           <td>${l.descricao}</td>
           <td>${l.parcelaAtual}/${l.totalParcelas}</td>
           <td>R$ ${l.valor.toFixed(2)}</td>
-        </tr>
-      `;
+        </tr>`;
     });
 
   totalFatura.textContent = `Total: R$ ${total.toFixed(2)}`;
@@ -330,6 +373,7 @@ function pieChartCtx() {
 }
 
 function renderTudo() {
+  renderRendasExtras();
   renderCartoes();
   renderTabela();
   renderResumo();
