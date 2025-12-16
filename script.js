@@ -65,7 +65,10 @@ if (localStorage.getItem("theme") === "dark") {
 }
 themeBtn.onclick = () => {
   document.body.classList.toggle("dark");
-  localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
+  localStorage.setItem(
+    "theme",
+    document.body.classList.contains("dark") ? "dark" : "light"
+  );
   themeBtn.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
 };
 
@@ -130,7 +133,7 @@ function renderRendasExtras() {
 }
 
 /* ======================================================
-   CARTÕES (EDITAR / EXCLUIR CORRIGIDO)
+   CARTÕES (EDITAR / EXCLUIR)
 ====================================================== */
 function salvarCartao() {
   if (!cartaoNome.value || !cartaoFechamento.value || !cartaoVencimento.value) return;
@@ -170,13 +173,9 @@ function editarCartao(id) {
 function excluirCartao(id) {
   if (!confirm("Excluir este cartão?")) return;
 
-  // mantém histórico dos lançamentos
-  lancamentos = lancamentos.map(l => {
-    if (l.cartaoId === id) {
-      return { ...l, cartaoId: null };
-    }
-    return l;
-  });
+  lancamentos = lancamentos.map(l =>
+    l.cartaoId === id ? { ...l, cartaoId: null } : l
+  );
 
   cartoes = cartoes.filter(c => c.id !== id);
 
@@ -299,10 +298,8 @@ function desativarAssinatura(id) {
 
 function aplicarAssinaturasNoMes() {
   assinaturas.filter(a => a.ativa).forEach(a => {
-    const existe = lancamentos.some(l =>
-      l.assinaturaId === a.id &&
-      l.mesRef === mesAtivo &&
-      l.anoRef === anoAtivo
+    const existe = lancamentos.some(
+      l => l.assinaturaId === a.id && l.mesRef === mesAtivo && l.anoRef === anoAtivo
     );
     if (!existe) {
       lancamentos.push({
@@ -334,7 +331,7 @@ function renderAssinaturas() {
 }
 
 /* ======================================================
-   DASHBOARD
+   DASHBOARD / GRÁFICOS / TABELA
 ====================================================== */
 function renderResumo() {
   const rendaBase = rendaPrincipal[`${mesAtivo}-${anoAtivo}`] || 0;
@@ -354,9 +351,6 @@ function renderResumo() {
   renderGraficos(rendaBase, rendaExtra, gastos, rendaBase + rendaExtra - gastos);
 }
 
-/* ======================================================
-   GRÁFICOS
-====================================================== */
 function renderGraficos(rb, re, g, s) {
   if (barChart) barChart.destroy();
   if (pieChart) pieChart.destroy();
@@ -386,41 +380,6 @@ function renderGraficos(rb, re, g, s) {
   });
 }
 
-/* ======================================================
-   ASSINATURAS – GRÁFICO
-====================================================== */
-function renderGraficoAssinaturas() {
-  const dados = {};
-  lancamentos
-    .filter(l => l.categoria === "Assinatura" && l.mesRef === mesAtivo && l.anoRef === anoAtivo)
-    .forEach(l => dados[l.descricao] = (dados[l.descricao] || 0) + l.valor);
-
-  if (assinaturaChart) assinaturaChart.destroy();
-
-  assinaturaChart = new Chart(document.getElementById("assinaturaChart"), {
-    type: "pie",
-    data: {
-      labels: Object.keys(dados),
-      datasets: [{ data: Object.values(dados) }]
-    },
-    options: { responsive: false }
-  });
-
-  const total = Object.values(dados).reduce((a, b) => a + b, 0);
-  const rendaTotal = (rendaPrincipal[`${mesAtivo}-${anoAtivo}`] || 0) +
-    rendasExtras
-      .filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo)
-      .reduce((a, b) => a + b.valor, 0);
-
-  impactoAssinaturas.innerHTML = `
-    Assinaturas: R$ ${total.toFixed(2)}<br>
-    Impacto na renda: ${rendaTotal ? ((total / rendaTotal) * 100).toFixed(1) : 0}%
-  `;
-}
-
-/* ======================================================
-   TABELA
-====================================================== */
 function renderTabela() {
   tabela.innerHTML = "";
   lancamentos
@@ -447,29 +406,20 @@ function excluirLancamento(id) {
 }
 
 /* ======================================================
-   INIT
-====================================================== */
-function renderTudo() {
-  aplicarAssinaturasNoMes();
-  renderRendasExtras();
-  renderCartoes();
-  renderAssinaturas();
-  renderTabela();
-  renderResumo();
-  renderGraficoAssinaturas();
-}
-window.exportarBackup = exportarBackup;
-window.importarBackup = importarBackup;
-window.editarCartao = editarCartao;
-window.excluirCartao = excluirCartao;
-window.salvarCartao = salvarCartao;
-/* ======================================================
-   BACKUP – EXPORTAR / IMPORTAR
+   BACKUP COMPLETO
 ====================================================== */
 function exportarBackup() {
   const backup = {
-    cartoes,
-    config: {
+    meta: {
+      criadoEm: new Date().toISOString(),
+      versao: "1.0"
+    },
+    estado: {
+      cartoes,
+      lancamentos,
+      assinaturas,
+      rendaPrincipal,
+      rendasExtras,
       mesAtivo,
       anoAtivo
     }
@@ -483,7 +433,7 @@ function exportarBackup() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `backup_cartoes_${mesAtivo}_${anoAtivo}.json`;
+  a.download = `backup_financeiro_${mesAtivo}_${anoAtivo}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -501,31 +451,56 @@ function importarBackup() {
     try {
       const data = JSON.parse(e.target.result);
 
-      if (!data.cartoes || !data.config) {
+      if (!data.estado) {
         alert("Arquivo de backup inválido.");
         return;
       }
 
-      if (!confirm("Importar cartões do backup? Isso substituirá os cartões atuais.")) return;
+      if (!confirm("Importar backup completo e substituir todos os dados?")) return;
 
-      cartoes = data.cartoes;
-      mesAtivo = data.config.mesAtivo;
-      anoAtivo = data.config.anoAtivo;
+      cartoes = data.estado.cartoes || [];
+      lancamentos = data.estado.lancamentos || [];
+      assinaturas = data.estado.assinaturas || [];
+      rendaPrincipal = data.estado.rendaPrincipal || {};
+      rendasExtras = data.estado.rendasExtras || [];
+      mesAtivo = data.estado.mesAtivo || mesAtivo;
+      anoAtivo = data.estado.anoAtivo || anoAtivo;
 
       localStorage.setItem("cartoes", JSON.stringify(cartoes));
+      localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+      localStorage.setItem("assinaturas", JSON.stringify(assinaturas));
+      localStorage.setItem("rendaPrincipal", JSON.stringify(rendaPrincipal));
+      localStorage.setItem("rendasExtras", JSON.stringify(rendasExtras));
 
       mesAtivoEl.value = mesAtivo;
       anoAtivoEl.value = anoAtivo;
 
       renderTudo();
-      alert("Backup importado com sucesso!");
+      alert("Backup completo restaurado com sucesso!");
     } catch (err) {
+      console.error(err);
       alert("Erro ao importar backup.");
     }
   };
   reader.readAsText(file);
 }
 
+/* ======================================================
+   INIT
+====================================================== */
+function renderTudo() {
+  aplicarAssinaturasNoMes();
+  renderRendasExtras();
+  renderCartoes();
+  renderAssinaturas();
+  renderTabela();
+  renderResumo();
+}
+
+window.editarCartao = editarCartao;
+window.excluirCartao = excluirCartao;
+window.salvarCartao = salvarCartao;
+window.exportarBackup = exportarBackup;
+window.importarBackup = importarBackup;
+
 renderTudo();
-
-
