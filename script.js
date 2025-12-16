@@ -463,6 +463,69 @@ window.importarBackup = importarBackup;
 window.editarCartao = editarCartao;
 window.excluirCartao = excluirCartao;
 window.salvarCartao = salvarCartao;
+/* ======================================================
+   BACKUP – EXPORTAR / IMPORTAR
+====================================================== */
+function exportarBackup() {
+  const backup = {
+    cartoes,
+    config: {
+      mesAtivo,
+      anoAtivo
+    }
+  };
+
+  const blob = new Blob(
+    [JSON.stringify(backup, null, 2)],
+    { type: "application/json" }
+  );
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `backup_cartoes_${mesAtivo}_${anoAtivo}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importarBackup() {
+  const fileInput = document.getElementById("importFile");
+  const file = fileInput.files[0];
+  if (!file) {
+    alert("Selecione um arquivo de backup.");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+
+      if (!data.cartoes || !data.config) {
+        alert("Arquivo de backup inválido.");
+        return;
+      }
+
+      if (!confirm("Importar cartões do backup? Isso substituirá os cartões atuais.")) return;
+
+      cartoes = data.cartoes;
+      mesAtivo = data.config.mesAtivo;
+      anoAtivo = data.config.anoAtivo;
+
+      localStorage.setItem("cartoes", JSON.stringify(cartoes));
+
+      mesAtivoEl.value = mesAtivo;
+      anoAtivoEl.value = anoAtivo;
+
+      renderTudo();
+      alert("Backup importado com sucesso!");
+    } catch (err) {
+      alert("Erro ao importar backup.");
+    }
+  };
+  reader.readAsText(file);
+}
 
 renderTudo();
+
 
