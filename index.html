@@ -99,6 +99,23 @@
     </div>
   </section>
 
+  <!-- ================= DASHBOARD DE CARTÕES ================= -->
+  <section class="input-section">
+    <h2>📊 Dashboard de Cartões</h2>
+
+    <div class="form">
+      <select id="cartaoDashboard">
+        <option value="">Todos os cartões</option>
+      </select>
+    </div>
+
+    <div class="charts">
+      <div class="chart-box">
+        <canvas id="cartaoChart" width="360" height="260"></canvas>
+      </div>
+    </div>
+  </section>
+
   <!-- ================= CARTÕES ================= -->
   <section class="input-section">
     <h2>💳 Cartões</h2>
@@ -181,7 +198,7 @@
   <p>Controle Financeiro • GitHub Pages</p>
 </footer>
 
-<!-- SCRIPT (defer evita erros de DOM) -->
+<!-- Script carregado após o HTML -->
 <script src="script.js" defer></script>
 </body>
 </html>
