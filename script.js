@@ -195,8 +195,8 @@ function renderCartoes() {
           <small>Fechamento: ${c.fechamento} | Vencimento: ${c.vencimento}</small>
         </div>
         <div>
-          <button class="btn-edit" onclick="editarCartao('${c.id}')">✏️</button>
-          <button class="btn-delete" onclick="excluirCartao('${c.id}')">🗑️</button>
+          <button type="button" class="btn-edit" onclick="editarCartao('${c.id}')">✏️</button>
+          <button type="button" class="btn-delete" onclick="excluirCartao('${c.id}')">🗑️</button>
         </div>
       </li>
     `;
@@ -451,5 +451,8 @@ function renderTudo() {
   renderResumo();
   renderGraficoAssinaturas();
 }
-
+window.editarCartao = editarCartao;
+window.excluirCartao = excluirCartao;
+window.salvarCartao = salvarCartao;
 renderTudo();
+
