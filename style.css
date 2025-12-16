@@ -270,72 +270,90 @@ footer {
 }
 
 /* =====================================================
-   🌙 DARK MODE — PREMIUM & CONFORTÁVEL
+   DARK MODE — APRIMORADO
 ===================================================== */
+
 body.dark {
-  background: #020617;
-  color: #e5e7eb;
+  background: #0a0f1b;        /* fundo escuro mas não preto absoluto */
+  color: #e2e8f0;            /* texto claro */
 }
 
-/* Header / Footer */
+/* header e footer */
 body.dark header,
 body.dark footer {
-  background: linear-gradient(135deg, #020617, #020617);
+  background: #131a2b;       /* tom consistente com o restante */
+  color: #e2e8f0;
 }
 
-/* Seções */
+/* seções principais */
 body.dark .input-section,
 body.dark .tabela,
 body.dark .backup {
-  background: #0b1220;
-  border: 1px solid #334155;
-  box-shadow: 0 16px 40px rgba(0,0,0,0.65);
+  background: #111827;       /* fundo escuro de superfície */
+  border: 1px solid #374151; /* borda visível contra fundo */
 }
 
-/* Cards */
+/* cards com contraste reforçado */
 body.dark .card {
-  background: linear-gradient(135deg, #1e293b, #0b1220);
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 20px 45px rgba(0,0,0,0.8);
+  background: #1e293b;       /* cor de card mais clara que o fundo geral */
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
 }
 
-/* Gráficos */
+/* chart-box mais destacado */
 body.dark .chart-box {
-  background: #111827;
-  border: 1px solid #475569;
-  box-shadow: 0 18px 40px rgba(0,0,0,0.8);
+  background: #1e293b;
+  border: 1px solid #4b5563;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
 }
 
-/* Inputs */
-body.dark .form input,
-body.dark .form select,
-body.dark .form input[type="file"] {
-  background: #020617;
-  color: #e5e7eb;
-  border-color: #475569;
-}
-
-/* Tabela */
+/* tabela cabeçalho */
 body.dark table thead {
   background: #1e293b;
 }
 
+/* linhas da tabela */
 body.dark tbody tr {
-  border-bottom: 1px solid #334155;
+  background: #0f172a;
+  border-bottom: 1px solid #374151;
 }
 
 body.dark tbody tr:hover {
-  background: #1e293b;
+  background: #273449;
 }
 
-/* Texto */
-body.dark p,
-body.dark span,
-body.dark td,
-body.dark th,
-body.dark li,
-body.dark small {
-  color: #e5e7eb;
+/* formulários */
+body.dark .form input,
+body.dark .form select,
+body.dark .form input[type="file"] {
+  background: #1e293b;
+  color: #e2e8f0;
+  border: 1px solid #4b5563;
+}
+
+body.dark .form input::placeholder,
+body.dark .form select::placeholder {
+  color: #94a3b8;
+}
+
+/* botões */
+body.dark button {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+}
+
+/* texto dentro de cards e listas */
+body.dark #listaCartoes li,
+body.dark #listaRendasExtras li,
+body.dark #listaAssinaturas li {
+  background: #1e293b;
+  border: 1px solid #374151;
+  color: #e2e8f0;
+}
+
+/* impacto assinaturas */
+body.dark #impactoAssinaturas {
+  background: #1e293b;
+  border: 1px solid #4b5563;
+  color: #e2e8f0;
 }
 
 /* =====================================================
@@ -359,3 +377,4 @@ body.dark small {
     font-size: 0.85rem;
   }
 }
+
