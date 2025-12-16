@@ -396,10 +396,38 @@ function registrarCompraParcelada(
   localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
   renderTudo();
 }
+function aplicarAssinaturasNoMes() {
+  assinaturas
+    .filter(a => a.ativa)
+    .forEach(a => {
+      const jaExiste = lancamentos.some(l =>
+        l.assinaturaId === a.id &&
+        l.mesRef === mesAtivo &&
+        l.anoRef === anoAtivo
+      );
+
+      if (!jaExiste) {
+        lancamentos.push({
+          id: gerarId(),
+          tipo: "Gasto",
+          categoria: "Assinatura",
+          descricao: a.descricao,
+          valor: a.valor,
+          cartaoId: a.cartaoId,
+          assinaturaId: a.id,
+          mesRef: mesAtivo,
+          anoRef: anoAtivo
+        });
+      }
+    });
+
+  localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+}
 /* ======================================================
    INIT
 ====================================================== */
 renderTudo();
+
 
 
 
