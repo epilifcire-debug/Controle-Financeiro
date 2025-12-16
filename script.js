@@ -279,7 +279,87 @@ function renderGraficoAssinaturas() {
     }
   });
 }
+/* ======================================================
+   BACKUP COMPLETO
+====================================================== */
+function exportarBackup() {
+  const backup = {
+    meta: {
+      criadoEm: new Date().toISOString(),
+      versao: "1.0"
+    },
+    estado: {
+      cartoes,
+      lancamentos,
+      assinaturas,
+      rendaPrincipal,
+      rendasExtras,
+      mesAtivo,
+      anoAtivo
+    }
+  };
 
+  const blob = new Blob(
+    [JSON.stringify(backup, null, 2)],
+    { type: "application/json" }
+  );
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `backup_financeiro_${mesAtivo}_${anoAtivo}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importarBackup() {
+  const input = document.getElementById("importFile");
+  const file = input?.files?.[0];
+
+  if (!file) {
+    alert("Selecione um arquivo de backup.");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+
+      if (!data.estado) {
+        alert("Arquivo de backup inválido.");
+        return;
+      }
+
+      if (!confirm("Importar backup completo e substituir todos os dados?")) return;
+
+      cartoes = data.estado.cartoes || [];
+      lancamentos = data.estado.lancamentos || [];
+      assinaturas = data.estado.assinaturas || [];
+      rendaPrincipal = data.estado.rendaPrincipal || {};
+      rendasExtras = data.estado.rendasExtras || [];
+      mesAtivo = data.estado.mesAtivo || mesAtivo;
+      anoAtivo = data.estado.anoAtivo || anoAtivo;
+
+      localStorage.setItem("cartoes", JSON.stringify(cartoes));
+      localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+      localStorage.setItem("assinaturas", JSON.stringify(assinaturas));
+      localStorage.setItem("rendaPrincipal", JSON.stringify(rendaPrincipal));
+      localStorage.setItem("rendasExtras", JSON.stringify(rendasExtras));
+
+      document.getElementById("mesAtivo").value = mesAtivo;
+      document.getElementById("anoAtivo").value = anoAtivo;
+
+      renderTudo();
+      alert("Backup restaurado com sucesso!");
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao importar backup.");
+    }
+  };
+
+  reader.readAsText(file);
+}
 /* ======================================================
    INIT
 ====================================================== */
@@ -297,5 +377,7 @@ window.excluirCartao = excluirCartao;
 window.salvarRendaPrincipal = salvarRendaPrincipal;
 window.adicionarRendaExtra = adicionarRendaExtra;
 window.atualizarMesAtivo = atualizarMesAtivo;
-
+window.importarBackup = importarBackup;
+window.exportarBackup = exportarBackup;
 renderTudo();
+
