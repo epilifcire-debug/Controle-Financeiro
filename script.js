@@ -351,9 +351,53 @@ window.salvarAssinatura = salvarAssinatura;
 window.atualizarMesAtivo = atualizarMesAtivo;
 window.exportarBackup = exportarBackup;
 window.importarBackup = importarBackup;
+/* ======================================================
+   COMPRA PARCELADA (FUNÇÃO AUSENTE)
+====================================================== */
+function registrarCompraParcelada(
+  cartaoId,
+  descricao,
+  valorTotal,
+  parcelas,
+  mesInicial,
+  anoInicial
+) {
+  if (!cartaoId || !descricao || !valorTotal || !parcelas || !mesInicial || !anoInicial) {
+    alert("Preencha todos os campos da compra parcelada.");
+    return;
+  }
 
+  const valorParcela = +(valorTotal / parcelas).toFixed(2);
+
+  for (let i = 1; i <= parcelas; i++) {
+    let mes = mesInicial + (i - 1);
+    let ano = anoInicial;
+
+    if (mes > 12) {
+      ano += Math.floor((mes - 1) / 12);
+      mes = ((mes - 1) % 12) + 1;
+    }
+
+    lancamentos.push({
+      id: gerarId(),
+      tipo: "Gasto",
+      categoria: "Cartão",
+      descricao,
+      valor: valorParcela,
+      parcelaAtual: i,
+      totalParcelas: parcelas,
+      cartaoId,
+      mesRef: mes,
+      anoRef: ano
+    });
+  }
+
+  localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+  renderTudo();
+}
 /* ======================================================
    INIT
 ====================================================== */
 renderTudo();
+
 
