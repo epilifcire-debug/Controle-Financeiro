@@ -11,10 +11,12 @@ let rendasExtras = JSON.parse(localStorage.getItem("rendasExtras")) || [];
 let mesAtivo = new Date().getMonth() + 1;
 let anoAtivo = new Date().getFullYear();
 
+let cartaoEditandoId = null;
+
 let barChart, pieChart, cartaoChart, assinaturaChart;
 
 /* ======================================================
-   ELEMENTOS DO DOM (CRÍTICO)
+   ELEMENTOS DO DOM
 ====================================================== */
 const mesAtivoEl = document.getElementById("mesAtivo");
 const anoAtivoEl = document.getElementById("anoAtivo");
@@ -54,7 +56,7 @@ function gerarId() {
 }
 
 /* ======================================================
-   MODO ESCURO
+   TEMA
 ====================================================== */
 const themeBtn = document.getElementById("toggleTheme");
 if (localStorage.getItem("theme") === "dark") {
@@ -68,7 +70,7 @@ themeBtn.onclick = () => {
 };
 
 /* ======================================================
-   MÊS EM VIGÊNCIA
+   MÊS ATIVO
 ====================================================== */
 mesAtivoEl.value = mesAtivo;
 anoAtivoEl.value = anoAtivo;
@@ -128,21 +130,41 @@ function renderRendasExtras() {
 }
 
 /* ======================================================
-   CARTÕES
+   CARTÕES (COM EDITAR)
 ====================================================== */
 function salvarCartao() {
   if (!cartaoNome.value || !cartaoFechamento.value || !cartaoVencimento.value) return;
 
-  cartoes.push({
-    id: gerarId(),
-    nome: cartaoNome.value,
-    fechamento: +cartaoFechamento.value,
-    vencimento: +cartaoVencimento.value
-  });
+  if (cartaoEditandoId) {
+    const c = cartoes.find(c => c.id === cartaoEditandoId);
+    if (!c) return;
+
+    c.nome = cartaoNome.value;
+    c.fechamento = +cartaoFechamento.value;
+    c.vencimento = +cartaoVencimento.value;
+    cartaoEditandoId = null;
+  } else {
+    cartoes.push({
+      id: gerarId(),
+      nome: cartaoNome.value,
+      fechamento: +cartaoFechamento.value,
+      vencimento: +cartaoVencimento.value
+    });
+  }
 
   localStorage.setItem("cartoes", JSON.stringify(cartoes));
   cartaoNome.value = cartaoFechamento.value = cartaoVencimento.value = "";
   renderTudo();
+}
+
+function editarCartao(id) {
+  const c = cartoes.find(c => c.id === id);
+  if (!c) return;
+
+  cartaoEditandoId = id;
+  cartaoNome.value = c.nome;
+  cartaoFechamento.value = c.fechamento;
+  cartaoVencimento.value = c.vencimento;
 }
 
 function excluirCartao(id) {
@@ -159,6 +181,7 @@ function excluirCartao(id) {
 
 function renderCartoes() {
   listaCartoes.innerHTML = "";
+
   cartaoDashboard.innerHTML = "<option value=''>Todos</option>";
   compraCartao.innerHTML = "<option value=''>Selecione</option>";
   assinaturaCartao.innerHTML = "<option value=''>Selecione</option>";
@@ -167,9 +190,17 @@ function renderCartoes() {
   cartoes.forEach(c => {
     listaCartoes.innerHTML += `
       <li>
-        ${c.nome}
-        <button class="btn-delete" onclick="excluirCartao('${c.id}')">🗑️</button>
-      </li>`;
+        <div>
+          <strong>${c.nome}</strong><br>
+          <small>Fechamento: ${c.fechamento} | Vencimento: ${c.vencimento}</small>
+        </div>
+        <div>
+          <button class="btn-edit" onclick="editarCartao('${c.id}')">✏️</button>
+          <button class="btn-delete" onclick="excluirCartao('${c.id}')">🗑️</button>
+        </div>
+      </li>
+    `;
+
     cartaoDashboard.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
     compraCartao.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
     assinaturaCartao.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
@@ -300,7 +331,6 @@ function renderAssinaturas() {
 ====================================================== */
 function renderResumo() {
   const rendaBase = rendaPrincipal[`${mesAtivo}-${anoAtivo}`] || 0;
-
   const rendaExtra = rendasExtras
     .filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo)
     .reduce((a, b) => a + b.valor, 0);
@@ -312,11 +342,9 @@ function renderResumo() {
   rendaEl.textContent = `R$ ${rendaBase.toFixed(2)}`;
   rendaExtraEl.textContent = `R$ ${rendaExtra.toFixed(2)}`;
   gastosEl.textContent = `R$ ${gastos.toFixed(2)}`;
+  sobraEl.textContent = `R$ ${(rendaBase + rendaExtra - gastos).toFixed(2)}`;
 
-  const sobra = rendaBase + rendaExtra - gastos;
-  sobraEl.textContent = `R$ ${sobra.toFixed(2)}`;
-
-  renderGraficos(rendaBase, rendaExtra, gastos, sobra);
+  renderGraficos(rendaBase, rendaExtra, gastos, rendaBase + rendaExtra - gastos);
 }
 
 /* ======================================================
@@ -352,11 +380,10 @@ function renderGraficos(rb, re, g, s) {
 }
 
 /* ======================================================
-   ASSINATURAS – GRÁFICO E IMPACTO
+   ASSINATURAS – GRÁFICO
 ====================================================== */
 function renderGraficoAssinaturas() {
   const dados = {};
-
   lancamentos
     .filter(l => l.categoria === "Assinatura" && l.mesRef === mesAtivo && l.anoRef === anoAtivo)
     .forEach(l => dados[l.descricao] = (dados[l.descricao] || 0) + l.valor);
@@ -372,15 +399,15 @@ function renderGraficoAssinaturas() {
     options: { responsive: false }
   });
 
-  const totalAss = Object.values(dados).reduce((a, b) => a + b, 0);
+  const total = Object.values(dados).reduce((a, b) => a + b, 0);
   const rendaTotal = (rendaPrincipal[`${mesAtivo}-${anoAtivo}`] || 0) +
     rendasExtras
       .filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo)
       .reduce((a, b) => a + b.valor, 0);
 
   impactoAssinaturas.innerHTML = `
-    Assinaturas: R$ ${totalAss.toFixed(2)}<br>
-    Impacto na renda: ${rendaTotal ? ((totalAss / rendaTotal) * 100).toFixed(1) : 0}%
+    Assinaturas: R$ ${total.toFixed(2)}<br>
+    Impacto na renda: ${rendaTotal ? ((total / rendaTotal) * 100).toFixed(1) : 0}%
   `;
 }
 
