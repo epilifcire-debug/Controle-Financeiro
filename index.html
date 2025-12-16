@@ -1,18 +1,22 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>💰 Controle Financeiro</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- CSS -->
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
 
+<!-- =====================================================
+  HEADER
+===================================================== -->
 <header>
   <h1>💰 Controle Financeiro</h1>
   <button id="toggleTheme" class="theme-btn">🌙</button>
@@ -20,104 +24,225 @@
 
 <main>
 
-  <!-- MÊS -->
-  <section class="input-section">
-    <h2>📅 Mês em Vigência</h2>
-    <div class="form">
-      <select id="mesAtivo">
-        <option value="1">Janeiro</option><option value="2">Fevereiro</option>
-        <option value="3">Março</option><option value="4">Abril</option>
-        <option value="5">Maio</option><option value="6">Junho</option>
-        <option value="7">Julho</option><option value="8">Agosto</option>
-        <option value="9">Setembro</option><option value="10">Outubro</option>
-        <option value="11">Novembro</option><option value="12">Dezembro</option>
-      </select>
-      <input id="anoAtivo" type="number">
-      <button onclick="atualizarMesAtivo()">Aplicar</button>
+<!-- =====================================================
+  MÊS / ANO
+===================================================== -->
+<section class="input-section">
+  <h2>📅 Mês em Vigência</h2>
+  <div class="form">
+    <select id="mesAtivo">
+      <option value="1">Janeiro</option>
+      <option value="2">Fevereiro</option>
+      <option value="3">Março</option>
+      <option value="4">Abril</option>
+      <option value="5">Maio</option>
+      <option value="6">Junho</option>
+      <option value="7">Julho</option>
+      <option value="8">Agosto</option>
+      <option value="9">Setembro</option>
+      <option value="10">Outubro</option>
+      <option value="11">Novembro</option>
+      <option value="12">Dezembro</option>
+    </select>
+
+    <input id="anoAtivo" type="number" placeholder="Ano" />
+    <button type="button" onclick="atualizarMesAtivo()">Aplicar</button>
+  </div>
+</section>
+
+<!-- =====================================================
+  RENDA
+===================================================== -->
+<section class="input-section">
+  <h2>💼 Renda do Mês</h2>
+
+  <div class="form">
+    <input id="rendaPrincipal" type="number" placeholder="Renda principal" />
+    <button type="button" onclick="salvarRendaPrincipal()">Salvar Renda</button>
+  </div>
+
+  <h3 style="margin-top:1rem;">➕ Rendas Extras</h3>
+  <div class="form">
+    <input id="descricaoRendaExtra" placeholder="Descrição" />
+    <input id="valorRendaExtra" type="number" placeholder="Valor" />
+    <button type="button" onclick="adicionarRendaExtra()">Adicionar</button>
+  </div>
+
+  <ul id="listaRendasExtras"></ul>
+</section>
+
+<!-- =====================================================
+  CARDS RESUMO
+===================================================== -->
+<section class="cards">
+  <div class="card blue">
+    <h3>💼 Renda</h3>
+    <p id="rendaEl">R$ 0,00</p>
+  </div>
+
+  <div class="card yellow">
+    <h3>💛 Renda Extra</h3>
+    <p id="rendaExtraEl">R$ 0,00</p>
+  </div>
+
+  <div class="card red">
+    <h3>💸 Gastos</h3>
+    <p id="gastosEl">R$ 0,00</p>
+  </div>
+
+  <div class="card green">
+    <h3>💰 Sobra</h3>
+    <p id="sobraEl">R$ 0,00</p>
+  </div>
+</section>
+
+<!-- =====================================================
+  GRÁFICOS GERAIS
+===================================================== -->
+<section class="charts">
+  <div class="chart-box">
+    <canvas id="barChart"></canvas>
+  </div>
+  <div class="chart-box">
+    <canvas id="pieChart"></canvas>
+  </div>
+</section>
+
+<!-- =====================================================
+  DASHBOARD DE CARTÕES
+===================================================== -->
+<section class="input-section">
+  <h2>📊 Gastos por Cartão</h2>
+
+  <div class="form">
+    <select id="cartaoDashboard">
+      <option value="">Todos os cartões</option>
+    </select>
+  </div>
+
+  <div class="charts">
+    <div class="chart-box">
+      <canvas id="cartaoChart"></canvas>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- RENDA -->
-  <section class="input-section">
-    <h2>💼 Renda</h2>
-    <div class="form">
-      <input id="rendaPrincipal" type="number" placeholder="Renda principal">
-      <button onclick="salvarRendaPrincipal()">Salvar</button>
+<!-- =====================================================
+  CARTÕES
+===================================================== -->
+<section class="input-section">
+  <h2>💳 Cartões</h2>
+
+  <div class="form">
+    <input id="cartaoNome" placeholder="Nome do cartão" />
+    <input id="cartaoFechamento" type="number" min="1" max="31" placeholder="Fechamento" />
+    <input id="cartaoVencimento" type="number" min="1" max="31" placeholder="Vencimento" />
+    <button type="button" onclick="salvarCartao()">Salvar / Atualizar</button>
+  </div>
+
+  <ul id="listaCartoes"></ul>
+</section>
+
+<!-- =====================================================
+  COMPRA PARCELADA
+===================================================== -->
+<section class="input-section">
+  <h2>🛒 Compra Parcelada</h2>
+
+  <div class="form">
+    <select id="compraCartao"></select>
+    <input id="compraDescricao" placeholder="Descrição" />
+    <input id="compraValor" type="number" placeholder="Valor total" />
+    <input id="compraParcelas" type="number" placeholder="Parcelas" />
+    <input id="compraMes" type="number" min="1" max="12" placeholder="Mês inicial" />
+    <input id="compraAno" type="number" placeholder="Ano inicial" />
+
+    <button type="button" onclick="
+      registrarCompraParcelada(
+        compraCartao.value,
+        compraDescricao.value,
+        +compraValor.value,
+        +compraParcelas.value,
+        +compraMes.value,
+        +compraAno.value
+      )
+    ">Registrar</button>
+  </div>
+</section>
+
+<!-- =====================================================
+  ASSINATURAS
+===================================================== -->
+<section class="input-section">
+  <h2>🔁 Assinaturas</h2>
+
+  <div class="form">
+    <input id="assinaturaDescricao" placeholder="Descrição" />
+    <input id="assinaturaValor" type="number" placeholder="Valor" />
+    <select id="assinaturaCartao"></select>
+    <button type="button" onclick="salvarAssinatura()">Salvar</button>
+  </div>
+
+  <ul id="listaAssinaturas"></ul>
+</section>
+
+<!-- =====================================================
+  ASSINATURAS x RENDA
+===================================================== -->
+<section class="input-section">
+  <h2>📊 Assinaturas x Renda</h2>
+
+  <div class="charts">
+    <div class="chart-box">
+      <canvas id="assinaturaChart"></canvas>
     </div>
+  </div>
 
-    <h3>➕ Renda Extra</h3>
-    <div class="form">
-      <input id="descricaoRendaExtra" placeholder="Descrição">
-      <input id="valorRendaExtra" type="number" placeholder="Valor">
-      <button onclick="adicionarRendaExtra()">Adicionar</button>
-    </div>
+  <div id="impactoAssinaturas"></div>
+</section>
 
-    <ul id="listaRendasExtras"></ul>
-  </section>
+<!-- =====================================================
+  LANÇAMENTOS
+===================================================== -->
+<section class="tabela">
+  <h2>📋 Lançamentos do Mês</h2>
 
-  <!-- CARDS -->
-  <section class="cards">
-    <div class="card blue"><h3>Renda</h3><p id="rendaEl">R$ 0,00</p></div>
-    <div class="card yellow"><h3>Extra</h3><p id="rendaExtraEl">R$ 0,00</p></div>
-    <div class="card red"><h3>Gastos</h3><p id="gastosEl">R$ 0,00</p></div>
-    <div class="card green"><h3>Sobra</h3><p id="sobraEl">R$ 0,00</p></div>
-  </section>
+  <table>
+    <thead>
+      <tr>
+        <th>Tipo</th>
+        <th>Categoria</th>
+        <th>Descrição</th>
+        <th>Valor</th>
+        <th>Cartão</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody id="tabela"></tbody>
+  </table>
+</section>
 
-  <!-- GRÁFICOS -->
-  <section class="charts">
-    <div class="chart-box"><canvas id="barChart"></canvas></div>
-    <div class="chart-box"><canvas id="pieChart"></canvas></div>
-  </section>
+<!-- =====================================================
+  BACKUP
+===================================================== -->
+<section class="backup">
+  <h2>💾 Backup</h2>
 
-  <!-- CARTÕES -->
-  <section class="input-section">
-    <h2>💳 Cartões</h2>
-    <div class="form">
-      <input id="cartaoNome" placeholder="Nome">
-      <input id="cartaoFechamento" type="number" placeholder="Fechamento">
-      <input id="cartaoVencimento" type="number" placeholder="Vencimento">
-      <button onclick="salvarCartao()">Salvar</button>
-    </div>
-    <ul id="listaCartoes"></ul>
-  </section>
-
-  <!-- ASSINATURAS -->
-  <section class="input-section">
-    <h2>🔁 Assinaturas</h2>
-    <div class="form">
-      <input id="assinaturaDescricao" placeholder="Descrição">
-      <input id="assinaturaValor" type="number" placeholder="Valor">
-      <select id="assinaturaCartao"></select>
-      <button onclick="salvarAssinatura()">Salvar</button>
-    </div>
-    <ul id="listaAssinaturas"></ul>
-  </section>
-
-  <!-- LANÇAMENTOS -->
-  <section class="tabela">
-    <h2>📋 Lançamentos</h2>
-    <table>
-      <thead>
-        <tr><th>Tipo</th><th>Categoria</th><th>Descrição</th><th>Valor</th><th>Cartão</th><th>Ação</th></tr>
-      </thead>
-      <tbody id="tabela"></tbody>
-    </table>
-  </section>
-
-  <!-- BACKUP -->
-  <section class="backup">
-    <h2>💾 Backup</h2>
-    <div class="form">
-      <button onclick="exportarBackup()">Exportar</button>
-      <input type="file" id="importFile" accept=".json">
-      <button onclick="importarBackup()">Importar</button>
-    </div>
-  </section>
+  <div class="form">
+    <button type="button" onclick="exportarBackup()">⬇️ Exportar Backup</button>
+    <input type="file" id="importFile" accept=".json" />
+    <button type="button" onclick="importarBackup()">⬆️ Importar Backup</button>
+  </div>
+</section>
 
 </main>
 
-<footer>Controle Financeiro • Local / GitHub Pages</footer>
+<footer>
+  <p>Controle Financeiro • Local / GitHub Pages</p>
+</footer>
 
-<script src="script.js"></script>
+<!-- JS -->
+<script src="script.js" defer></script>
+
 </body>
 </html>
