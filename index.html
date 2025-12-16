@@ -10,12 +10,16 @@
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- jsPDF -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 
 <body>
 
 <header>
   <h1>💰 Controle Financeiro</h1>
+  <button id="toggleTheme" class="theme-btn">🌙</button>
 </header>
 
 <main>
@@ -25,69 +29,30 @@
     <h2>💳 Cadastro de Cartões</h2>
 
     <div class="form">
-      <input
-        type="text"
-        id="cartaoNome"
-        placeholder="Nome do cartão (ex: Nubank)"
-      >
-
-      <input
-        type="number"
-        id="cartaoFechamento"
-        placeholder="Dia de fechamento"
-        min="1"
-        max="31"
-      >
-
-      <input
-        type="number"
-        id="cartaoVencimento"
-        placeholder="Dia de vencimento"
-        min="1"
-        max="31"
-      >
-
+      <input id="cartaoNome" placeholder="Nome do cartão (ex: Nubank)">
+      <input id="cartaoFechamento" type="number" min="1" max="31" placeholder="Fechamento">
+      <input id="cartaoVencimento" type="number" min="1" max="31" placeholder="Vencimento">
       <button onclick="salvarCartao()">Salvar Cartão</button>
     </div>
 
     <ul id="listaCartoes"></ul>
   </section>
 
-  <!-- ================= LANÇAMENTOS ================= -->
+  <!-- ================= COMPRA PARCELADA ================= -->
   <section class="input-section">
-    <h2>➕ Novo Lançamento</h2>
+    <h2>🛒 Compra no Cartão (Parcelada)</h2>
 
     <div class="form">
-      <select id="tipo">
-        <option value="Renda">Renda</option>
-        <option value="Gasto">Gasto</option>
-        <option value="Investimento">Investimento</option>
-      </select>
-
-      <input
-        type="text"
-        id="categoria"
-        placeholder="Categoria (Alimentação, Caixinha, Saúde...)"
-      >
-
-      <input
-        type="text"
-        id="descricao"
-        placeholder="Descrição"
-      >
-
-      <input
-        type="number"
-        id="valor"
-        placeholder="Valor (R$)"
-        step="0.01"
-      >
-
-      <select id="cartaoSelect">
-        <option value="">Sem cartão</option>
-      </select>
-
-      <button onclick="salvarLancamento()">Salvar Lançamento</button>
+      <select id="compraCartao"></select>
+      <input id="compraDescricao" placeholder="Descrição da compra">
+      <input id="compraValor" type="number" placeholder="Valor total">
+      <input id="compraParcelas" type="number" placeholder="Parcelas">
+      <button onclick="registrarCompraParcelada(
+        compraCartao.value,
+        compraDescricao.value,
+        +compraValor.value,
+        +compraParcelas.value
+      )">Registrar Compra</button>
     </div>
   </section>
 
@@ -97,12 +62,10 @@
       <h3>💼 Renda</h3>
       <p id="rendaEl">R$ 0,00</p>
     </div>
-
     <div class="card red">
       <h3>💸 Gastos</h3>
       <p id="gastosEl">R$ 0,00</p>
     </div>
-
     <div class="card blue">
       <h3>💰 Sobra</h3>
       <p id="sobraEl">R$ 0,00</p>
@@ -114,16 +77,66 @@
     <div class="chart-box">
       <canvas id="barChart" width="360" height="260"></canvas>
     </div>
-
     <div class="chart-box">
       <canvas id="pieChart" width="360" height="260"></canvas>
     </div>
   </section>
 
-  <!-- ================= TABELA ================= -->
+  <!-- ================= DASHBOARD POR CARTÃO ================= -->
+  <section class="input-section">
+    <h2>📊 Dashboard por Cartão</h2>
+    <select id="cartaoDashboard"></select>
+    <canvas id="cartaoChart" width="360" height="260"></canvas>
+  </section>
+
+  <!-- ================= FATURA MENSAL ================= -->
+  <section class="input-section">
+    <h2>📆 Fatura Mensal do Cartão</h2>
+
+    <div class="form">
+      <select id="faturaCartao"></select>
+
+      <select id="faturaMes">
+        <option value="1">Janeiro</option>
+        <option value="2">Fevereiro</option>
+        <option value="3">Março</option>
+        <option value="4">Abril</option>
+        <option value="5">Maio</option>
+        <option value="6">Junho</option>
+        <option value="7">Julho</option>
+        <option value="8">Agosto</option>
+        <option value="9">Setembro</option>
+        <option value="10">Outubro</option>
+        <option value="11">Novembro</option>
+        <option value="12">Dezembro</option>
+      </select>
+
+      <input id="faturaAno" type="number" value="2025">
+
+      <button onclick="renderFatura()">Ver Fatura</button>
+      <button onclick="gerarPDFfatura()">🧾 PDF</button>
+    </div>
+
+    <h3 id="totalFatura">Total: R$ 0,00</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Descrição</th>
+          <th>Parcela</th>
+          <th>Valor</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaFatura"></tbody>
+    </table>
+
+    <h3>📊 Timeline de Parcelas</h3>
+    <div id="timelineParcelas"></div>
+  </section>
+
+  <!-- ================= LANÇAMENTOS ================= -->
   <section class="tabela">
     <h2>📋 Lançamentos</h2>
-
     <table>
       <thead>
         <tr>
@@ -135,7 +148,6 @@
           <th>Ações</th>
         </tr>
       </thead>
-
       <tbody id="tabela"></tbody>
     </table>
   </section>
@@ -143,11 +155,8 @@
   <!-- ================= BACKUP ================= -->
   <section class="backup">
     <h2>💾 Backup dos Cartões</h2>
-
     <button onclick="exportarBackup()">⬇️ Exportar Cartões</button>
-
     <input type="file" id="importFile" accept=".json">
-
     <button onclick="importarBackup()">⬆️ Importar Cartões</button>
   </section>
 
@@ -157,8 +166,6 @@
   <p>Controle Financeiro • GitHub Pages</p>
 </footer>
 
-<!-- Script principal -->
 <script src="script.js"></script>
-
 </body>
 </html>
