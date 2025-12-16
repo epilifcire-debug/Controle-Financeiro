@@ -1,16 +1,16 @@
 /* ======================================================
-   DADOS PRINCIPAIS
+   DADOS
 ====================================================== */
 let cartoes = JSON.parse(localStorage.getItem("cartoes")) || [];
 let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
 
 let cartaoEditIndex = null;
-let editIndexLancamento = null;
+let lancamentoEditIndex = null;
 
 let barChart, pieChart, cartaoChart;
 
 /* ======================================================
-   CORES PADRÃO
+   CORES
 ====================================================== */
 const CORES = {
   renda: "#3182ce",
@@ -19,7 +19,7 @@ const CORES = {
 };
 
 /* ======================================================
-   UTILIDADES
+   UTIL
 ====================================================== */
 function gerarId() {
   return "c_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
@@ -29,12 +29,10 @@ function gerarId() {
    MODO ESCURO
 ====================================================== */
 const themeBtn = document.getElementById("toggleTheme");
-
 if (localStorage.getItem("theme") === "dark") {
   document.body.classList.add("dark");
   themeBtn.textContent = "☀️";
 }
-
 themeBtn.onclick = () => {
   document.body.classList.toggle("dark");
   const dark = document.body.classList.contains("dark");
@@ -49,138 +47,85 @@ function salvarCartao() {
   const nome = cartaoNome.value.trim();
   const fechamento = +cartaoFechamento.value;
   const vencimento = +cartaoVencimento.value;
-
-  if (!nome || !fechamento || !vencimento) {
-    alert("Preencha todos os dados do cartão");
-    return;
-  }
+  if (!nome || !fechamento || !vencimento) return alert("Dados do cartão incompletos");
 
   if (cartaoEditIndex !== null) {
-    cartoes[cartaoEditIndex].nome = nome;
-    cartoes[cartaoEditIndex].fechamento = fechamento;
-    cartoes[cartaoEditIndex].vencimento = vencimento;
+    Object.assign(cartoes[cartaoEditIndex], { nome, fechamento, vencimento });
     cartaoEditIndex = null;
   } else {
-    cartoes.push({
-      id: gerarId(),
-      nome,
-      fechamento,
-      vencimento
-    });
+    cartoes.push({ id: gerarId(), nome, fechamento, vencimento });
   }
 
-  persistirCartoes();
-  limparFormularioCartao();
+  localStorage.setItem("cartoes", JSON.stringify(cartoes));
+  cartaoNome.value = cartaoFechamento.value = cartaoVencimento.value = "";
   renderTudo();
 }
 
-function editarCartao(index) {
-  const c = cartoes[index];
+function editarCartao(i) {
+  const c = cartoes[i];
   cartaoNome.value = c.nome;
   cartaoFechamento.value = c.fechamento;
   cartaoVencimento.value = c.vencimento;
-  cartaoEditIndex = index;
+  cartaoEditIndex = i;
 }
 
-function excluirCartao(cartaoId) {
-  const usado = lancamentos.some(l => l.cartaoId === cartaoId);
-  if (usado) {
-    alert("❌ Este cartão possui lançamentos e não pode ser excluído.");
-    return;
-  }
-  if (!confirm("Tem certeza que deseja excluir este cartão?")) return;
-
-  cartoes = cartoes.filter(c => c.id !== cartaoId);
-  persistirCartoes();
+function excluirCartao(id) {
+  if (lancamentos.some(l => l.cartaoId === id))
+    return alert("Cartão possui lançamentos e não pode ser excluído");
+  if (!confirm("Excluir cartão?")) return;
+  cartoes = cartoes.filter(c => c.id !== id);
+  localStorage.setItem("cartoes", JSON.stringify(cartoes));
   renderTudo();
 }
 
-function persistirCartoes() {
-  localStorage.setItem("cartoes", JSON.stringify(cartoes));
-}
-
-function limparFormularioCartao() {
-  cartaoNome.value = "";
-  cartaoFechamento.value = "";
-  cartaoVencimento.value = "";
-}
-
-/* ======================================================
-   RENDER CARTÕES
-====================================================== */
 function renderCartoes() {
   listaCartoes.innerHTML = "";
-  cartaoDashboard.innerHTML = "<option value=''>Selecione</option>";
+  cartaoDashboard.innerHTML = "<option value=''>Todos</option>";
   faturaCartao.innerHTML = "<option value=''>Selecione</option>";
   compraCartao.innerHTML = "<option value=''>Selecione</option>";
 
   cartoes.forEach((c, i) => {
     listaCartoes.innerHTML += `
       <li>
-        💳 <strong>${c.nome}</strong>
-        — Fecha ${c.fechamento} | Vence ${c.vencimento}
+        💳 ${c.nome} (fecha ${c.fechamento})
         <span>
           <button class="btn-edit" onclick="editarCartao(${i})">✏️</button>
           <button class="btn-delete" onclick="excluirCartao('${c.id}')">🗑️</button>
         </span>
-      </li>
-    `;
-
+      </li>`;
     cartaoDashboard.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
     faturaCartao.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
     compraCartao.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
   });
-
-  verificarFechamento();
 }
 
 /* ======================================================
-   ALERTA DE FECHAMENTO
+   LANÇAMENTO NORMAL
 ====================================================== */
-function verificarFechamento() {
-  const hoje = new Date().getDate();
-  cartoes.forEach(c => {
-    const dias = c.fechamento - hoje;
-    if (dias >= 0 && dias <= 3) {
-      console.warn(`🔔 Fatura do cartão ${c.nome} fecha em ${dias} dia(s)`);
-    }
+function salvarLancamentoNormal(tipo, categoria, descricao, valor) {
+  lancamentos.push({
+    tipo,
+    categoria,
+    descricao,
+    valor,
+    data: new Date().toISOString()
   });
+  localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+  renderTudo();
 }
 
 /* ======================================================
-   CÁLCULO DE FATURA
+   PARCELAMENTO COM MÊS INICIAL
 ====================================================== */
-function calcularFatura(cartao, dataCompra = new Date()) {
-  let mes = dataCompra.getMonth() + 1;
-  let ano = dataCompra.getFullYear();
-
-  if (dataCompra.getDate() > cartao.fechamento) {
-    mes++;
-    if (mes > 12) {
-      mes = 1;
-      ano++;
-    }
-  }
-  return { mes, ano };
-}
-
-/* ======================================================
-   COMPRAS PARCELADAS
-====================================================== */
-function registrarCompraParcelada(cartaoId, descricao, valorTotal, parcelas) {
+function registrarCompraParcelada(cartaoId, descricao, valorTotal, parcelas, mesInicial, anoInicial) {
   const cartao = cartoes.find(c => c.id === cartaoId);
-  if (!cartao || !descricao || !valorTotal || !parcelas) {
-    alert("Preencha todos os dados da compra");
-    return;
-  }
+  if (!cartao) return;
 
   const valorParcela = +(valorTotal / parcelas).toFixed(2);
-  const base = calcularFatura(cartao);
 
   for (let i = 1; i <= parcelas; i++) {
-    let mes = base.mes + (i - 1);
-    let ano = base.ano;
-
+    let mes = mesInicial + (i - 1);
+    let ano = anoInicial;
     if (mes > 12) {
       ano += Math.floor((mes - 1) / 12);
       mes = ((mes - 1) % 12) + 1;
@@ -189,11 +134,8 @@ function registrarCompraParcelada(cartaoId, descricao, valorTotal, parcelas) {
     lancamentos.push({
       tipo: "Gasto",
       categoria: "Cartão",
-      descricao,
+      descricao: `${descricao} — ${parcelas}x de R$ ${valorParcela.toFixed(2)} (${i}/${parcelas})`,
       valor: valorParcela,
-      valorParcela,
-      totalParcelas: parcelas,
-      parcelaAtual: i,
       cartaoId,
       mesFatura: mes,
       anoFatura: ano
@@ -205,201 +147,126 @@ function registrarCompraParcelada(cartaoId, descricao, valorTotal, parcelas) {
 }
 
 /* ======================================================
+   TABELA LANÇAMENTOS (TODOS)
+====================================================== */
+function renderTabela() {
+  tabela.innerHTML = "";
+  lancamentos.forEach((l, i) => {
+    const cartao = cartoes.find(c => c.id === l.cartaoId);
+    tabela.innerHTML += `
+      <tr>
+        <td>${l.tipo}</td>
+        <td>${l.categoria || "-"}</td>
+        <td>${l.descricao}</td>
+        <td>R$ ${l.valor.toFixed(2)}</td>
+        <td>${cartao ? cartao.nome : "-"}</td>
+        <td><button class="btn-edit" onclick="editarLancamento(${i})">✏️</button></td>
+      </tr>`;
+  });
+}
+
+function editarLancamento(i) {
+  const l = lancamentos[i];
+  alert("Edição simples: apague e recadastre se necessário.\n(Funcionalidade pode ser expandida)");
+}
+
+/* ======================================================
    DASHBOARD GERAL
 ====================================================== */
 function renderResumo() {
-  const renda = lancamentos
-    .filter(l => l.tipo === "Renda")
-    .reduce((a, b) => a + b.valor, 0);
-
-  const gastos = lancamentos
-    .filter(l => l.tipo !== "Renda")
-    .reduce((a, b) => a + b.valor, 0);
+  const renda = lancamentos.filter(l => l.tipo === "Renda").reduce((a,b)=>a+b.valor,0);
+  const gastos = lancamentos.filter(l => l.tipo !== "Renda").reduce((a,b)=>a+b.valor,0);
 
   rendaEl.textContent = `R$ ${renda.toFixed(2)}`;
   gastosEl.textContent = `R$ ${gastos.toFixed(2)}`;
-  sobraEl.textContent = `R$ ${(renda - gastos).toFixed(2)}`;
+  sobraEl.textContent = `R$ ${(renda-gastos).toFixed(2)}`;
 
-  renderGraficos(renda, gastos, renda - gastos);
+  renderGraficos(renda, gastos, renda-gastos);
 }
 
-function renderGraficos(renda, gastos, sobra) {
-  if (barChart) barChart.destroy();
-  if (pieChart) pieChart.destroy();
+function renderGraficos(r,g,s){
+  if(barChart) barChart.destroy();
+  if(pieChart) pieChart.destroy();
 
-  barChart = new Chart(barChartCtx(), {
-    type: "bar",
-    data: {
-      labels: ["Renda", "Gastos", "Sobra"],
-      datasets: [{
-        data: [renda, gastos, sobra],
-        backgroundColor: [CORES.renda, CORES.gasto, CORES.sobra]
-      }]
-    },
-    options: { responsive: false, plugins: { legend: { display: false } } }
+  barChart = new Chart(barChartCtx(),{
+    type:"bar",
+    data:{labels:["Renda","Gastos","Sobra"],
+      datasets:[{data:[r,g,s],backgroundColor:[CORES.renda,CORES.gasto,CORES.sobra]}]},
+    options:{responsive:false}
   });
 
-  pieChart = new Chart(pieChartCtx(), {
-    type: "pie",
-    data: {
-      labels: ["Gastos", "Sobra"],
-      datasets: [{
-        data: [gastos, sobra],
-        backgroundColor: [CORES.gasto, CORES.sobra]
-      }]
-    },
-    options: { responsive: false }
+  pieChart = new Chart(pieChartCtx(),{
+    type:"pie",
+    data:{labels:["Gastos","Sobra"],
+      datasets:[{data:[g,s],backgroundColor:[CORES.gasto,CORES.sobra]}]},
+    options:{responsive:false}
   });
 }
 
 /* ======================================================
-   DASHBOARD POR CARTÃO
+   DASHBOARD CARTÕES (TODOS OU UM)
 ====================================================== */
 cartaoDashboard.onchange = () => {
   const id = cartaoDashboard.value;
-  if (!id) return;
+  const dados = {};
 
-  const total = lancamentos
-    .filter(l => l.cartaoId === id)
-    .reduce((a, b) => a + b.valor, 0);
-
-  if (cartaoChart) cartaoChart.destroy();
-
-  cartaoChart = new Chart(
-    document.getElementById("cartaoChart").getContext("2d"),
-    {
-      type: "doughnut",
-      data: {
-        labels: ["Total gasto"],
-        datasets: [{ data: [total], backgroundColor: [CORES.gasto] }]
+  lancamentos.forEach(l => {
+    if (l.cartaoId) {
+      if (!id || l.cartaoId === id) {
+        const nome = cartoes.find(c => c.id === l.cartaoId)?.nome || "Outro";
+        dados[nome] = (dados[nome] || 0) + l.valor;
       }
     }
-  );
+  });
+
+  if (cartaoChart) cartaoChart.destroy();
+  cartaoChart = new Chart(document.getElementById("cartaoChart"),{
+    type:"pie",
+    data:{labels:Object.keys(dados),
+      datasets:[{data:Object.values(dados)}]},
+    options:{responsive:false}
+  });
 };
 
 /* ======================================================
-   FATURA MENSAL
+   FATURA
 ====================================================== */
 function renderFatura() {
   const cartaoId = faturaCartao.value;
   const mes = +faturaMes.value;
   const ano = +faturaAno.value;
-
-  const itens = lancamentos.filter(l =>
-    l.cartaoId === cartaoId &&
-    l.mesFatura === mes &&
-    l.anoFatura === ano
-  );
-
   tabelaFatura.innerHTML = "";
   timelineParcelas.innerHTML = "";
 
   let total = 0;
   const hoje = new Date();
 
-  itens.forEach(l => {
+  lancamentos.filter(l =>
+    l.cartaoId === cartaoId &&
+    l.mesFatura === mes &&
+    l.anoFatura === ano
+  ).forEach(l => {
     total += l.valor;
-
     tabelaFatura.innerHTML += `
       <tr>
         <td>${l.descricao}</td>
-        <td>${l.parcelaAtual}/${l.totalParcelas}</td>
         <td>R$ ${l.valor.toFixed(2)}</td>
-      </tr>
-    `;
-
-    const paga =
-      l.anoFatura < hoje.getFullYear() ||
-      (l.anoFatura === hoje.getFullYear() &&
-       l.mesFatura < hoje.getMonth() + 1);
-
-    timelineParcelas.innerHTML += `
-      <div class="timeline-item ${paga ? "paga" : "pendente"}">
-        ${l.parcelaAtual}/${l.totalParcelas}
-        <small>${l.mesFatura}/${l.anoFatura}</small>
-      </div>
-    `;
+      </tr>`;
   });
 
   totalFatura.textContent = `Total: R$ ${total.toFixed(2)}`;
 }
 
 /* ======================================================
-   PDF DA FATURA
-====================================================== */
-function gerarPDFfatura() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  const cartao = cartoes.find(c => c.id === faturaCartao.value);
-  if (!cartao) return;
-
-  const mes = faturaMes.options[faturaMes.selectedIndex].text;
-  const ano = faturaAno.value;
-
-  doc.text(`Fatura ${cartao.nome} - ${mes}/${ano}`, 10, 10);
-
-  let y = 20;
-  let total = 0;
-
-  const itens = lancamentos.filter(l =>
-    l.cartaoId === faturaCartao.value &&
-    l.mesFatura === +faturaMes.value &&
-    l.anoFatura === +faturaAno.value
-  );
-
-  itens.forEach(l => {
-    doc.text(
-      `${l.descricao} (${l.parcelaAtual}/${l.totalParcelas}) - R$ ${l.valor.toFixed(2)}`,
-      10, y
-    );
-    y += 8;
-    total += l.valor;
-  });
-
-  y += 6;
-  doc.text(`Total da fatura: R$ ${total.toFixed(2)}`, 10, y);
-
-  doc.save(`fatura_${cartao.nome}_${mes}_${ano}.pdf`);
-}
-
-/* ======================================================
-   BACKUP (SÓ CARTÕES)
-====================================================== */
-function exportarBackup() {
-  const blob = new Blob([JSON.stringify(cartoes)], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "backup_cartoes.json";
-  a.click();
-}
-
-function importarBackup() {
-  const file = importFile.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = e => {
-    cartoes = JSON.parse(e.target.result);
-    persistirCartoes();
-    renderTudo();
-  };
-  reader.readAsText(file);
-}
-
-/* ======================================================
    INIT
 ====================================================== */
-function barChartCtx() {
-  return document.getElementById("barChart").getContext("2d");
-}
-function pieChartCtx() {
-  return document.getElementById("pieChart").getContext("2d");
-}
+function barChartCtx(){return document.getElementById("barChart").getContext("2d")}
+function pieChartCtx(){return document.getElementById("pieChart").getContext("2d")}
 
-function renderTudo() {
+function renderTudo(){
   renderCartoes();
   renderResumo();
+  renderTabela();
 }
 
 renderTudo();
