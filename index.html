@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💰 Controle Financeiro</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <h1>💰 Controle Financeiro</h1>
+    <div class="filters">
+      <label>Mês:
+        <select id="mesSelect">
+          <option>Janeiro</option><option>Fevereiro</option><option>Março</option>
+          <option>Abril</option><option>Maio</option><option>Junho</option>
+          <option>Julho</option><option>Agosto</option><option>Setembro</option>
+          <option>Outubro</option><option>Novembro</option><option>Dezembro</option>
+        </select>
+      </label>
+      <label>Ano:
+        <input type="number" id="anoInput" min="2020" value="2025">
+      </label>
+    </div>
+  </header>
+
+  <main>
+    <section class="input-section">
+      <h2>➕ Novo Lançamento</h2>
+      <div class="form">
+        <select id="tipo">
+          <option value="Renda">Renda</option>
+          <option value="Gasto">Gasto</option>
+          <option value="Investimento">Investimento</option>
+        </select>
+        <input type="text" id="categoria" placeholder="Categoria (ex: Alimentação)">
+        <input type="text" id="descricao" placeholder="Descrição">
+        <input type="number" id="valor" placeholder="Valor (R$)">
+        <button id="addBtn">💾 Adicionar</button>
+      </div>
+    </section>
+
+    <section class="cards">
+      <div class="card green">
+        <h3>💼 Renda Total</h3>
+        <p id="rendaTotal">R$ 0,00</p>
+      </div>
+      <div class="card red">
+        <h3>💸 Gastos + Investimentos</h3>
+        <p id="gastosTotal">R$ 0,00</p>
+      </div>
+      <div class="card blue">
+        <h3>💰 Sobra</h3>
+        <p id="sobra">R$ 0,00</p>
+      </div>
+    </section>
+
+    <section class="charts">
+      <canvas id="barChart"></canvas>
+      <canvas id="pieChart"></canvas>
+    </section>
+
+    <section class="backup">
+      <h2>💾 Backup</h2>
+      <button id="exportBtn">⬇️ Exportar</button>
+      <input type="file" id="importInput" accept=".json">
+      <button id="importBtn">⬆️ Importar</button>
+    </section>
+  </main>
+
+  <footer>
+    <p>Feito com 💚 por Eric Filipe | GitHub Pages</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
