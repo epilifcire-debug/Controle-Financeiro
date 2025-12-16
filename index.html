@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
   <header>
     <h1>💰 Controle Financeiro</h1>
@@ -26,6 +28,7 @@
   </header>
 
   <main>
+    <!-- 🔹 Novo Lançamento -->
     <section class="input-section">
       <h2>➕ Novo Lançamento</h2>
       <div class="form">
@@ -34,13 +37,14 @@
           <option value="Gasto">Gasto</option>
           <option value="Investimento">Investimento</option>
         </select>
-        <input type="text" id="categoria" placeholder="Categoria (ex: Alimentação)">
+        <input type="text" id="categoria" placeholder="Categoria (ex: Alimentação, Caixinha)">
         <input type="text" id="descricao" placeholder="Descrição">
         <input type="number" id="valor" placeholder="Valor (R$)">
         <button id="addBtn">💾 Adicionar</button>
       </div>
     </section>
 
+    <!-- 🔹 Resumo Financeiro -->
     <section class="cards">
       <div class="card green">
         <h3>💼 Renda Total</h3>
@@ -56,11 +60,31 @@
       </div>
     </section>
 
+    <!-- 🔹 Gráficos -->
     <section class="charts">
       <canvas id="barChart"></canvas>
       <canvas id="pieChart"></canvas>
     </section>
 
+    <!-- 🔹 Tabela de lançamentos -->
+    <section class="tabela">
+      <h2>📋 Lançamentos</h2>
+      <table id="tabelaLancamentos">
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Categoria</th>
+            <th>Descrição</th>
+            <th>Valor (R$)</th>
+            <th>Mês</th>
+            <th>Ano</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- 🔹 Backup -->
     <section class="backup">
       <h2>💾 Backup</h2>
       <button id="exportBtn">⬇️ Exportar</button>
