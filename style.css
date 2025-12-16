@@ -278,69 +278,61 @@ footer {
 }
 
 /* =====================================================
-   MODO ESCURO — CORRIGIDO
+   MODO ESCURO — CARDS MAIS ACESOS
 ===================================================== */
-body.dark {
-  background: #020617;
+
+/* Cards principais */
+body.dark .card {
+  background: #334155;            /* cinza mais claro */
   color: #f9fafb;
+  border: 1px solid #475569;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
 }
 
-/* Seções */
+/* Card renda extra continua amarelo */
+body.dark .card.yellow {
+  background: #facc15;
+  color: #020617;
+  border: 1px solid #eab308;
+}
+
+/* =====================================================
+   MODO ESCURO — GRÁFICOS MAIS VISÍVEIS
+===================================================== */
+
+/* Caixa dos gráficos */
+body.dark .chart-box {
+  background: #f8fafc;            /* quase branco */
+  border: 2px solid #334155;      /* separação clara */
+  box-shadow: 0 12px 32px rgba(0,0,0,0.9);
+}
+
+/* Títulos dentro das seções */
+body.dark .input-section h2,
+body.dark .tabela h2,
+body.dark .backup h2 {
+  color: #93c5fd;                 /* azul claro */
+}
+
+/* =====================================================
+   SEÇÕES COM MAIS CONTRASTE
+===================================================== */
 body.dark .input-section,
 body.dark .tabela,
 body.dark .backup {
-  background: #111827;
-  color: #f9fafb;
+  background: #0f172a;            /* levemente mais claro que o body */
+  border: 1px solid #334155;
 }
 
-/* Cards */
-body.dark .card {
-  background: #1f2937 !important;
-  color: #f9fafb;
-}
-
-/* Renda extra */
-body.dark .card.yellow {
-  background: #facc15 !important;
-  color: #020617 !important;
-}
-
-/* Listas */
-body.dark #listaCartoes li,
-body.dark #listaAssinaturas li,
-body.dark #listaRendasExtras li {
-  background: #1f2937;
-  color: #f9fafb;
-}
-
-/* Gráficos */
-body.dark .chart-box {
-  background: #f9fafb;
-}
-
-/* Tabela */
-body.dark thead {
-  background: #1f2937;
-}
-
-body.dark tbody tr {
-  border-bottom: 1px solid #374151;
-}
-
-/* Inputs */
-body.dark input,
-body.dark select {
-  background: #020617;
-  color: #f9fafb;
-  border-color: #374151;
-}
-
-/* Footer */
-footer {
-  background: #1e40af;
-  color: #fff;
-  text-align: center;
-  padding: 1rem;
+/* =====================================================
+   TEXTO GERAL MAIS LEGÍVEL
+===================================================== */
+body.dark p,
+body.dark span,
+body.dark td,
+body.dark th,
+body.dark li {
+  color: #e5e7eb;
 }
 
 /* =====================================================
@@ -364,4 +356,5 @@ footer {
     font-size: 0.85rem;
   }
 }
+
 
