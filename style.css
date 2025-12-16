@@ -103,7 +103,6 @@ main {
   box-shadow: 0 0 0 2px rgba(37,99,235,0.25);
 }
 
-/* input file (backup) */
 .form input[type="file"] {
   padding: 8px;
   background: #f8fafc;
@@ -128,7 +127,6 @@ button:hover {
   transform: translateY(-1px);
 }
 
-/* Botão excluir */
 .btn-delete {
   background: #dc2626;
   padding: 6px 10px;
@@ -139,7 +137,6 @@ button:hover {
   background: #b91c1c;
 }
 
-/* Botão editar */
 .btn-edit {
   background: #2563eb;
   padding: 6px 10px;
@@ -172,14 +169,6 @@ button:hover {
   justify-content: space-between;
   align-items: center;
   font-size: 0.9rem;
-}
-
-#listaRendasExtras li {
-  background: #fef9c3;
-}
-
-#listaAssinaturas li {
-  background: #ecfeff;
 }
 
 /* =====================================================
@@ -248,17 +237,6 @@ button:hover {
 }
 
 /* =====================================================
-   IMPACTO ASSINATURAS
-===================================================== */
-#impactoAssinaturas {
-  margin-top: 1rem;
-  padding: 14px;
-  border-radius: 14px;
-  background: #eef2ff;
-  font-weight: 600;
-}
-
-/* =====================================================
    TABELAS
 ===================================================== */
 table {
@@ -300,7 +278,7 @@ footer {
 }
 
 /* =====================================================
-   MODO ESCURO
+   MODO ESCURO — AJUSTADO
 ===================================================== */
 body.dark {
   background: #020617;
@@ -314,31 +292,31 @@ body.dark footer {
 
 body.dark .input-section,
 body.dark .tabela,
-body.dark .backup,
+body.dark .backup {
+  background: #020617;
+  border: 1px solid #334155;
+}
+
+body.dark .card {
+  background: #1e293b;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+}
+
 body.dark .chart-box {
-  background: #020617;
-  color: #e5e7eb;
+  background: #1e293b;
+  border: 1px solid #334155;
 }
 
-body.dark thead {
-  background: #020617;
+body.dark table thead {
+  background: #1e293b;
 }
 
-body.dark #listaCartoes li,
-body.dark #listaAssinaturas li {
-  background: #020617;
-}
-
-body.dark #listaRendasExtras li {
-  background: #3f3f1f;
+body.dark tbody tr {
+  border-bottom: 1px solid #334155;
 }
 
 body.dark tbody tr:hover {
   background: #111827;
-}
-
-body.dark #impactoAssinaturas {
-  background: #020617;
 }
 
 body.dark .form input,
@@ -347,6 +325,10 @@ body.dark .form input[type="file"] {
   background: #020617;
   color: #e5e7eb;
   border-color: #334155;
+}
+
+body.dark button {
+  box-shadow: 0 6px 16px rgba(0,0,0,0.6);
 }
 
 /* =====================================================
@@ -363,7 +345,7 @@ body.dark .form input[type="file"] {
 
   .chart-box {
     width: 100%;
-    height: auto;
+    height: 280px;
   }
 
   table {
