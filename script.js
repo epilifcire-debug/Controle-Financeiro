@@ -3,6 +3,7 @@
 ====================================================== */
 let cartoes = JSON.parse(localStorage.getItem("cartoes")) || [];
 let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
+let assinaturas = JSON.parse(localStorage.getItem("assinaturas")) || [];
 
 let rendaPrincipal = JSON.parse(localStorage.getItem("rendaPrincipal")) || {};
 let rendasExtras = JSON.parse(localStorage.getItem("rendasExtras")) || [];
@@ -10,18 +11,7 @@ let rendasExtras = JSON.parse(localStorage.getItem("rendasExtras")) || [];
 let mesAtivo = new Date().getMonth() + 1;
 let anoAtivo = new Date().getFullYear();
 
-let cartaoEditIndex = null;
-let barChart, pieChart, cartaoChart;
-
-/* ======================================================
-   CORES
-====================================================== */
-const CORES = {
-  renda: "#3182ce",
-  rendaExtra: "#ecc94b",
-  gasto: "#e53e3e",
-  sobra: "#38a169"
-};
+let barChart, pieChart, cartaoChart, assinaturaChart;
 
 /* ======================================================
    UTIL
@@ -40,9 +30,11 @@ if (localStorage.getItem("theme") === "dark") {
 }
 themeBtn.onclick = () => {
   document.body.classList.toggle("dark");
-  const dark = document.body.classList.contains("dark");
-  localStorage.setItem("theme", dark ? "dark" : "light");
-  themeBtn.textContent = dark ? "☀️" : "🌙";
+  localStorage.setItem(
+    "theme",
+    document.body.classList.contains("dark") ? "dark" : "light"
+  );
+  themeBtn.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
 };
 
 /* ======================================================
@@ -52,8 +44,8 @@ document.getElementById("mesAtivo").value = mesAtivo;
 document.getElementById("anoAtivo").value = anoAtivo;
 
 function atualizarMesAtivo() {
-  mesAtivo = +document.getElementById("mesAtivo").value;
-  anoAtivo = +document.getElementById("anoAtivo").value;
+  mesAtivo = +mesAtivoEl.value;
+  anoAtivo = +anoAtivoEl.value;
   renderTudo();
 }
 
@@ -61,7 +53,7 @@ function atualizarMesAtivo() {
    RENDA
 ====================================================== */
 function salvarRendaPrincipal() {
-  const valor = +document.getElementById("rendaPrincipal").value;
+  const valor = +rendaPrincipalEl.value;
   if (!valor) return;
 
   rendaPrincipal[`${mesAtivo}-${anoAtivo}`] = valor;
@@ -70,14 +62,12 @@ function salvarRendaPrincipal() {
 }
 
 function adicionarRendaExtra() {
-  const desc = descricaoRendaExtra.value;
-  const valor = +valorRendaExtra.value;
-  if (!desc || !valor) return;
+  if (!descricaoRendaExtra.value || !valorRendaExtra.value) return;
 
   rendasExtras.push({
     id: gerarId(),
-    descricao: desc,
-    valor,
+    descricao: descricaoRendaExtra.value,
+    valor: +valorRendaExtra.value,
     mesRef: mesAtivo,
     anoRef: anoAtivo
   });
@@ -111,37 +101,27 @@ function renderRendasExtras() {
    CARTÕES
 ====================================================== */
 function salvarCartao() {
-  const nome = cartaoNome.value.trim();
-  const fechamento = +cartaoFechamento.value;
-  const vencimento = +cartaoVencimento.value;
-  if (!nome || !fechamento || !vencimento) return;
+  if (!cartaoNome.value || !cartaoFechamento.value || !cartaoVencimento.value) return;
 
-  if (cartaoEditIndex !== null) {
-    Object.assign(cartoes[cartaoEditIndex], { nome, fechamento, vencimento });
-    cartaoEditIndex = null;
-  } else {
-    cartoes.push({ id: gerarId(), nome, fechamento, vencimento });
-  }
+  cartoes.push({
+    id: gerarId(),
+    nome: cartaoNome.value,
+    fechamento: +cartaoFechamento.value,
+    vencimento: +cartaoVencimento.value
+  });
 
   localStorage.setItem("cartoes", JSON.stringify(cartoes));
   cartaoNome.value = cartaoFechamento.value = cartaoVencimento.value = "";
   renderTudo();
 }
 
-function editarCartao(i) {
-  const c = cartoes[i];
-  cartaoNome.value = c.nome;
-  cartaoFechamento.value = c.fechamento;
-  cartaoVencimento.value = c.vencimento;
-  cartaoEditIndex = i;
-}
-
 function excluirCartao(id) {
   if (lancamentos.some(l => l.cartaoId === id)) {
-    alert("Cartão possui lançamentos");
+    alert("Este cartão possui lançamentos.");
     return;
   }
   if (!confirm("Excluir cartão?")) return;
+
   cartoes = cartoes.filter(c => c.id !== id);
   localStorage.setItem("cartoes", JSON.stringify(cartoes));
   renderTudo();
@@ -150,26 +130,25 @@ function excluirCartao(id) {
 function renderCartoes() {
   listaCartoes.innerHTML = "";
   cartaoDashboard.innerHTML = "<option value=''>Todos</option>";
-  faturaCartao.innerHTML = "<option value=''>Selecione</option>";
   compraCartao.innerHTML = "<option value=''>Selecione</option>";
+  assinaturaCartao.innerHTML = "<option value=''>Selecione</option>";
+  faturaCartao.innerHTML = "<option value=''>Selecione</option>";
 
-  cartoes.forEach((c, i) => {
+  cartoes.forEach(c => {
     listaCartoes.innerHTML += `
       <li>
-        💳 ${c.nome}
-        <span>
-          <button class="btn-edit" onclick="editarCartao(${i})">✏️</button>
-          <button class="btn-delete" onclick="excluirCartao('${c.id}')">🗑️</button>
-        </span>
+        ${c.nome}
+        <button class="btn-delete" onclick="excluirCartao('${c.id}')">🗑️</button>
       </li>`;
     cartaoDashboard.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
-    faturaCartao.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
     compraCartao.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
+    assinaturaCartao.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
+    faturaCartao.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
   });
 }
 
 /* ======================================================
-   LANÇAMENTO NORMAL
+   LANÇAMENTO MANUAL
 ====================================================== */
 function salvarLancamentoNormal(tipo, categoria, descricao, valor) {
   if (!descricao || !valor) return;
@@ -192,6 +171,8 @@ function salvarLancamentoNormal(tipo, categoria, descricao, valor) {
    COMPRA PARCELADA
 ====================================================== */
 function registrarCompraParcelada(cartaoId, descricao, valorTotal, parcelas, mesInicial, anoInicial) {
+  if (!cartaoId || !descricao || !valorTotal || !parcelas) return;
+
   const valorParcela = +(valorTotal / parcelas).toFixed(2);
 
   for (let i = 1; i <= parcelas; i++) {
@@ -221,57 +202,85 @@ function registrarCompraParcelada(cartaoId, descricao, valorTotal, parcelas, mes
 }
 
 /* ======================================================
-   TABELA DE LANÇAMENTOS
+   ASSINATURAS
 ====================================================== */
-function renderTabela() {
-  tabela.innerHTML = "";
-  lancamentos
-    .filter(l => l.mesRef === mesAtivo && l.anoRef === anoAtivo)
-    .forEach(l => {
-      const cartao = cartoes.find(c => c.id === l.cartaoId);
-      tabela.innerHTML += `
-        <tr>
-          <td>${l.tipo}</td>
-          <td>${l.categoria || "-"}</td>
-          <td>${l.descricao} ${l.totalParcelas ? `(${l.parcelaAtual}/${l.totalParcelas})` : ""}</td>
-          <td>R$ ${l.valor.toFixed(2)}</td>
-          <td>${cartao ? cartao.nome : "-"}</td>
-          <td>
-            <button class="btn-delete" onclick="excluirLancamento('${l.id}')">🗑️</button>
-          </td>
-        </tr>`;
-    });
-}
+function salvarAssinatura() {
+  if (!assinaturaDescricao.value || !assinaturaValor.value || !assinaturaCartao.value) return;
 
-function excluirLancamento(id) {
-  if (!confirm("Excluir lançamento?")) return;
-  lancamentos = lancamentos.filter(l => l.id !== id);
-  localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+  assinaturas.push({
+    id: gerarId(),
+    descricao: assinaturaDescricao.value,
+    valor: +assinaturaValor.value,
+    cartaoId: assinaturaCartao.value,
+    ativa: true
+  });
+
+  localStorage.setItem("assinaturas", JSON.stringify(assinaturas));
+  assinaturaDescricao.value = assinaturaValor.value = "";
   renderTudo();
 }
 
+function desativarAssinatura(id) {
+  const a = assinaturas.find(a => a.id === id);
+  if (!a) return;
+  a.ativa = false;
+  localStorage.setItem("assinaturas", JSON.stringify(assinaturas));
+  renderTudo();
+}
+
+function aplicarAssinaturasNoMes() {
+  assinaturas.filter(a => a.ativa).forEach(a => {
+    const existe = lancamentos.some(l =>
+      l.assinaturaId === a.id &&
+      l.mesRef === mesAtivo &&
+      l.anoRef === anoAtivo
+    );
+    if (!existe) {
+      lancamentos.push({
+        id: gerarId(),
+        tipo: "Gasto",
+        categoria: "Assinatura",
+        descricao: a.descricao,
+        valor: a.valor,
+        cartaoId: a.cartaoId,
+        assinaturaId: a.id,
+        mesRef: mesAtivo,
+        anoRef: anoAtivo
+      });
+    }
+  });
+  localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+}
+
+function renderAssinaturas() {
+  listaAssinaturas.innerHTML = "";
+  assinaturas.forEach(a => {
+    const cartao = cartoes.find(c => c.id === a.cartaoId);
+    listaAssinaturas.innerHTML += `
+      <li style="opacity:${a.ativa ? 1 : 0.5}">
+        ${a.descricao} — R$ ${a.valor.toFixed(2)} (${cartao?.nome || "-"})
+        ${a.ativa ? `<button class="btn-delete" onclick="desativarAssinatura('${a.id}')">Parar</button>` : "(inativa)"}
+      </li>`;
+  });
+}
+
 /* ======================================================
-   DASHBOARD GERAL
+   DASHBOARD & GRÁFICOS
 ====================================================== */
 function renderResumo() {
   const rendaBase = rendaPrincipal[`${mesAtivo}-${anoAtivo}`] || 0;
-
-  const rendaExtra = rendasExtras
-    .filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo)
+  const rendaExtra = rendasExtras.filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo)
     .reduce((a, b) => a + b.valor, 0);
 
-  const gastos = lancamentos
-    .filter(l => l.tipo !== "Renda" && l.mesRef === mesAtivo && l.anoRef === anoAtivo)
+  const gastos = lancamentos.filter(l => l.mesRef === mesAtivo && l.anoRef === anoAtivo)
     .reduce((a, b) => a + b.valor, 0);
 
   rendaEl.textContent = `R$ ${rendaBase.toFixed(2)}`;
   rendaExtraEl.textContent = `R$ ${rendaExtra.toFixed(2)}`;
   gastosEl.textContent = `R$ ${gastos.toFixed(2)}`;
+  sobraEl.textContent = `R$ ${(rendaBase + rendaExtra - gastos).toFixed(2)}`;
 
-  const sobra = rendaBase + rendaExtra - gastos;
-  sobraEl.textContent = `R$ ${sobra.toFixed(2)}`;
-
-  renderGraficos(rendaBase, rendaExtra, gastos, sobra);
+  renderGraficos(rendaBase, rendaExtra, gastos, rendaBase + rendaExtra - gastos);
 }
 
 function renderGraficos(rb, re, g, s) {
@@ -281,16 +290,8 @@ function renderGraficos(rb, re, g, s) {
   barChart = new Chart(barChartCtx(), {
     type: "bar",
     data: {
-      labels: ["Renda", "Renda Extra", "Gastos", "Sobra"],
-      datasets: [{
-        data: [rb, re, g, s],
-        backgroundColor: [
-          CORES.renda,
-          CORES.rendaExtra,
-          CORES.gasto,
-          CORES.sobra
-        ]
-      }]
+      labels: ["Renda", "Extra", "Gastos", "Sobra"],
+      datasets: [{ data: [rb, re, g, s], backgroundColor: ["#3182ce","#ecc94b","#e53e3e","#38a169"] }]
     },
     options: { responsive: false, plugins: { legend: { display: false } } }
   });
@@ -299,67 +300,62 @@ function renderGraficos(rb, re, g, s) {
     type: "pie",
     data: {
       labels: ["Gastos", "Sobra"],
-      datasets: [{
-        data: [g, s],
-        backgroundColor: [CORES.gasto, CORES.sobra]
-      }]
+      datasets: [{ data: [g, s], backgroundColor: ["#e53e3e","#38a169"] }]
     },
     options: { responsive: false }
   });
 }
 
 /* ======================================================
-   DASHBOARD CARTÕES
+   GRÁFICO ASSINATURAS + IMPACTO
 ====================================================== */
-cartaoDashboard.onchange = renderDashboardCartoes;
-
-function renderDashboardCartoes() {
+function renderGraficoAssinaturas() {
   const dados = {};
-  lancamentos
-    .filter(l => l.cartaoId && l.mesRef === mesAtivo && l.anoRef === anoAtivo)
-    .forEach(l => {
-      const nome = cartoes.find(c => c.id === l.cartaoId)?.nome || "Outro";
-      dados[nome] = (dados[nome] || 0) + l.valor;
-    });
+  lancamentos.filter(l => l.categoria === "Assinatura" && l.mesRef === mesAtivo && l.anoRef === anoAtivo)
+    .forEach(l => dados[l.descricao] = (dados[l.descricao] || 0) + l.valor);
 
-  if (cartaoChart) cartaoChart.destroy();
-  cartaoChart = new Chart(
-    document.getElementById("cartaoChart").getContext("2d"),
-    {
-      type: "pie",
-      data: {
-        labels: Object.keys(dados),
-        datasets: [{ data: Object.values(dados) }]
-      },
-      options: { responsive: false }
-    }
-  );
+  if (assinaturaChart) assinaturaChart.destroy();
+  assinaturaChart = new Chart(document.getElementById("assinaturaChart").getContext("2d"), {
+    type: "pie",
+    data: { labels: Object.keys(dados), datasets: [{ data: Object.values(dados) }] },
+    options: { responsive: false }
+  });
+
+  const totalAss = Object.values(dados).reduce((a, b) => a + b, 0);
+  const rendaTotal = (rendaPrincipal[`${mesAtivo}-${anoAtivo}`] || 0) +
+    rendasExtras.filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo).reduce((a, b) => a + b.valor, 0);
+
+  impactoAssinaturas.innerHTML = `
+    Assinaturas: R$ ${totalAss.toFixed(2)}<br>
+    Impacto na renda: ${rendaTotal ? ((totalAss / rendaTotal) * 100).toFixed(1) : 0}%
+  `;
 }
 
 /* ======================================================
-   FATURA
+   TABELA LANÇAMENTOS
 ====================================================== */
-function renderFatura() {
-  tabelaFatura.innerHTML = "";
-  let total = 0;
-
-  lancamentos
-    .filter(l =>
-      l.cartaoId === faturaCartao.value &&
-      l.mesRef === +faturaMes.value &&
-      l.anoRef === +faturaAno.value
-    )
+function renderTabela() {
+  tabela.innerHTML = "";
+  lancamentos.filter(l => l.mesRef === mesAtivo && l.anoRef === anoAtivo)
     .forEach(l => {
-      total += l.valor;
-      tabelaFatura.innerHTML += `
+      const cartao = cartoes.find(c => c.id === l.cartaoId);
+      tabela.innerHTML += `
         <tr>
-          <td>${l.descricao}</td>
-          <td>${l.parcelaAtual}/${l.totalParcelas}</td>
+          <td>${l.tipo}</td>
+          <td>${l.categoria || "-"}</td>
+          <td>${l.descricao}${l.totalParcelas ? ` (${l.parcelaAtual}/${l.totalParcelas})` : ""}</td>
           <td>R$ ${l.valor.toFixed(2)}</td>
+          <td>${cartao?.nome || "-"}</td>
+          <td><button class="btn-delete" onclick="excluirLancamento('${l.id}')">🗑️</button></td>
         </tr>`;
     });
+}
 
-  totalFatura.textContent = `Total: R$ ${total.toFixed(2)}`;
+function excluirLancamento(id) {
+  if (!confirm("Excluir lançamento?")) return;
+  lancamentos = lancamentos.filter(l => l.id !== id);
+  localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+  renderTudo();
 }
 
 /* ======================================================
@@ -373,11 +369,13 @@ function pieChartCtx() {
 }
 
 function renderTudo() {
+  aplicarAssinaturasNoMes();
   renderRendasExtras();
   renderCartoes();
+  renderAssinaturas();
   renderTabela();
   renderResumo();
-  renderDashboardCartoes();
+  renderGraficoAssinaturas();
 }
 
 renderTudo();
