@@ -17,7 +17,6 @@
 
 <body>
 
-<!-- ================= HEADER ================= -->
 <header>
   <h1>💰 Controle Financeiro</h1>
   <button id="toggleTheme" class="theme-btn">🌙</button>
@@ -25,7 +24,7 @@
 
 <main>
 
-  <!-- ================= MÊS EM VIGÊNCIA ================= -->
+  <!-- MÊS EM VIGÊNCIA -->
   <section class="input-section">
     <h2>📅 Mês em Vigência</h2>
     <div class="form">
@@ -44,63 +43,44 @@
         <option value="12">Dezembro</option>
       </select>
       <input id="anoAtivo" type="number" placeholder="Ano">
-      <button type="button" onclick="atualizarMesAtivo()">Aplicar</button>
+      <button onclick="atualizarMesAtivo()">Aplicar</button>
     </div>
   </section>
 
-  <!-- ================= RENDA ================= -->
+  <!-- RENDA -->
   <section class="input-section">
     <h2>💼 Renda do Mês</h2>
 
     <div class="form">
       <input id="rendaPrincipal" type="number" placeholder="Renda principal">
-      <button type="button" onclick="salvarRendaPrincipal()">Salvar Renda</button>
+      <button onclick="salvarRendaPrincipal()">Salvar Renda</button>
     </div>
 
     <h3 style="margin-top:1rem;">➕ Rendas Extras</h3>
     <div class="form">
-      <input id="descricaoRendaExtra" placeholder="Descrição da renda extra">
+      <input id="descricaoRendaExtra" placeholder="Descrição">
       <input id="valorRendaExtra" type="number" placeholder="Valor">
-      <button type="button" onclick="adicionarRendaExtra()">Adicionar</button>
+      <button onclick="adicionarRendaExtra()">Adicionar</button>
     </div>
 
     <ul id="listaRendasExtras"></ul>
   </section>
 
-  <!-- ================= DASHBOARD ================= -->
+  <!-- DASHBOARD -->
   <section class="cards">
-    <div class="card blue">
-      <h3>💼 Renda</h3>
-      <p id="rendaEl">R$ 0,00</p>
-    </div>
-
-    <div class="card yellow">
-      <h3>💛 Renda Extra</h3>
-      <p id="rendaExtraEl">R$ 0,00</p>
-    </div>
-
-    <div class="card red">
-      <h3>💸 Gastos</h3>
-      <p id="gastosEl">R$ 0,00</p>
-    </div>
-
-    <div class="card green">
-      <h3>💰 Sobra</h3>
-      <p id="sobraEl">R$ 0,00</p>
-    </div>
+    <div class="card blue"><h3>💼 Renda</h3><p id="rendaEl">R$ 0,00</p></div>
+    <div class="card yellow"><h3>💛 Extra</h3><p id="rendaExtraEl">R$ 0,00</p></div>
+    <div class="card red"><h3>💸 Gastos</h3><p id="gastosEl">R$ 0,00</p></div>
+    <div class="card green"><h3>💰 Sobra</h3><p id="sobraEl">R$ 0,00</p></div>
   </section>
 
-  <!-- ================= GRÁFICOS GERAIS ================= -->
+  <!-- GRÁFICOS GERAIS -->
   <section class="charts">
-    <div class="chart-box">
-      <canvas id="barChart"></canvas>
-    </div>
-    <div class="chart-box">
-      <canvas id="pieChart"></canvas>
-    </div>
+    <div class="chart-box"><canvas id="barChart"></canvas></div>
+    <div class="chart-box"><canvas id="pieChart"></canvas></div>
   </section>
 
-  <!-- ================= DASHBOARD DE CARTÕES ================= -->
+  <!-- DASHBOARD DE CARTÕES -->
   <section class="input-section">
     <h2>📊 Dashboard de Cartões</h2>
     <div class="form">
@@ -115,19 +95,19 @@
     </div>
   </section>
 
-  <!-- ================= CARTÕES ================= -->
+  <!-- CARTÕES -->
   <section class="input-section">
     <h2>💳 Cartões</h2>
     <div class="form">
       <input id="cartaoNome" placeholder="Nome do cartão">
-      <input id="cartaoFechamento" type="number" min="1" max="31" placeholder="Fechamento">
-      <input id="cartaoVencimento" type="number" min="1" max="31" placeholder="Vencimento">
-      <button type="button" onclick="salvarCartao()">Salvar / Atualizar</button>
+      <input id="cartaoFechamento" type="number" placeholder="Fechamento">
+      <input id="cartaoVencimento" type="number" placeholder="Vencimento">
+      <button onclick="salvarCartao()">Salvar / Atualizar</button>
     </div>
     <ul id="listaCartoes"></ul>
   </section>
 
-  <!-- ================= COMPRA PARCELADA ================= -->
+  <!-- COMPRA PARCELADA -->
   <section class="input-section">
     <h2>🛒 Compra Parcelada</h2>
     <div class="form">
@@ -135,9 +115,9 @@
       <input id="compraDescricao" placeholder="Descrição">
       <input id="compraValor" type="number" placeholder="Valor total">
       <input id="compraParcelas" type="number" placeholder="Parcelas">
-      <input id="compraMes" type="number" min="1" max="12" placeholder="Mês inicial">
+      <input id="compraMes" type="number" placeholder="Mês inicial">
       <input id="compraAno" type="number" placeholder="Ano inicial">
-      <button type="button" onclick="
+      <button onclick="
         registrarCompraParcelada(
           compraCartao.value,
           compraDescricao.value,
@@ -150,19 +130,19 @@
     </div>
   </section>
 
-  <!-- ================= ASSINATURAS ================= -->
+  <!-- ASSINATURAS -->
   <section class="input-section">
     <h2>🔁 Assinaturas</h2>
     <div class="form">
       <input id="assinaturaDescricao" placeholder="Descrição">
       <input id="assinaturaValor" type="number" placeholder="Valor">
       <select id="assinaturaCartao"></select>
-      <button type="button" onclick="salvarAssinatura()">Salvar Assinatura</button>
+      <button onclick="salvarAssinatura()">Salvar</button>
     </div>
     <ul id="listaAssinaturas"></ul>
   </section>
 
-  <!-- ================= ASSINATURAS × RENDA ================= -->
+  <!-- ASSINATURAS × RENDA -->
   <section class="input-section">
     <h2>📊 Assinaturas x Renda</h2>
     <div class="charts">
@@ -173,7 +153,7 @@
     <div id="impactoAssinaturas"></div>
   </section>
 
-  <!-- ================= LANÇAMENTOS ================= -->
+  <!-- LANÇAMENTOS -->
   <section class="tabela">
     <h2>📋 Lançamentos do Mês</h2>
     <table>
@@ -191,13 +171,13 @@
     </table>
   </section>
 
-  <!-- ================= BACKUP ================= -->
+  <!-- BACKUP -->
   <section class="backup">
     <h2>💾 Backup</h2>
     <div class="form">
-      <button type="button" onclick="exportarBackup()">⬇️ Exportar Backup</button>
+      <button onclick="exportarBackup()">⬇️ Exportar Backup</button>
       <input type="file" id="importFile" accept=".json">
-      <button type="button" onclick="importarBackup()">⬆️ Importar Backup</button>
+      <button onclick="importarBackup()">⬆️ Importar Backup</button>
     </div>
   </section>
 
@@ -207,7 +187,6 @@
   <p>Controle Financeiro • GitHub Pages</p>
 </footer>
 
-<!-- Script -->
 <script src="script.js" defer></script>
 </body>
 </html>
