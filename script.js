@@ -54,21 +54,31 @@ const impactoAssinaturas = $("impactoAssinaturas");
 const gerarId = () => "id_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
 
 /* ======================================================
-   TEMA
+   TEMA (COM RE-RENDER DOS GRÁFICOS)
 ====================================================== */
 const themeBtn = $("toggleTheme");
+
 if (localStorage.getItem("theme") === "dark") {
   document.body.classList.add("dark");
   themeBtn.textContent = "☀️";
 }
+
 themeBtn.onclick = () => {
   document.body.classList.toggle("dark");
-  localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
+  localStorage.setItem(
+    "theme",
+    document.body.classList.contains("dark") ? "dark" : "light"
+  );
   themeBtn.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
+
+  // 🔁 recria gráficos para ajustar cores
+  renderResumo();
+  renderDashboardCartoes();
+  renderGraficoAssinaturas();
 };
 
 /* ======================================================
-   MÊS
+   MÊS ATIVO
 ====================================================== */
 mesAtivoEl.value = mesAtivo;
 anoAtivoEl.value = anoAtivo;
@@ -112,7 +122,8 @@ function excluirRendaExtra(id) {
 
 function renderRendasExtras() {
   listaRendasExtras.innerHTML = "";
-  rendasExtras.filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo)
+  rendasExtras
+    .filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo)
     .forEach(r => {
       listaRendasExtras.innerHTML += `
         <li>${r.descricao} — R$ ${r.valor.toFixed(2)}
@@ -148,6 +159,7 @@ function salvarCartao() {
 
 function editarCartao(id) {
   const c = cartoes.find(c => c.id === id);
+  if (!c) return;
   cartaoEditandoId = id;
   cartaoNome.value = c.nome;
   cartaoFechamento.value = c.fechamento;
@@ -226,6 +238,12 @@ function salvarAssinatura() {
   renderTudo();
 }
 
+function desativarAssinatura(id) {
+  assinaturas.find(a => a.id === id).ativa = false;
+  localStorage.setItem("assinaturas", JSON.stringify(assinaturas));
+  renderTudo();
+}
+
 function aplicarAssinaturasNoMes() {
   assinaturas.filter(a => a.ativa).forEach(a => {
     if (!lancamentos.some(l => l.assinaturaId === a.id && l.mesRef === mesAtivo && l.anoRef === anoAtivo)) {
@@ -254,14 +272,67 @@ function renderAssinaturas() {
   });
 }
 
-function desativarAssinatura(id) {
-  assinaturas.find(a => a.id === id).ativa = false;
-  localStorage.setItem("assinaturas", JSON.stringify(assinaturas));
-  renderTudo();
+/* ======================================================
+   GRÁFICOS GERAIS
+====================================================== */
+function renderResumo() {
+  const isDark = document.body.classList.contains("dark");
+
+  const renda = rendaPrincipal[`${mesAtivo}-${anoAtivo}`] || 0;
+  const extra = rendasExtras.filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo)
+    .reduce((a,b)=>a+b.valor,0);
+  const gastos = lancamentos.filter(l => l.mesRef === mesAtivo && l.anoRef === anoAtivo)
+    .reduce((a,b)=>a+b.valor,0);
+  const sobra = renda + extra - gastos;
+
+  rendaEl.textContent = `R$ ${renda.toFixed(2)}`;
+  rendaExtraEl.textContent = `R$ ${extra.toFixed(2)}`;
+  gastosEl.textContent = `R$ ${gastos.toFixed(2)}`;
+  sobraEl.textContent = `R$ ${sobra.toFixed(2)}`;
+
+  if (barChart) barChart.destroy();
+  if (pieChart) pieChart.destroy();
+
+  barChart = new Chart($("barChart"), {
+    type: "bar",
+    data: {
+      labels: ["Renda", "Extra", "Gastos", "Sobra"],
+      datasets: [{
+        data: [renda, extra, gastos, sobra],
+        backgroundColor: ["#3b82f6","#facc15","#ef4444","#22c55e"]
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: isDark ? "#e5e7eb" : "#1f2937" } },
+        y: { ticks: { color: isDark ? "#e5e7eb" : "#1f2937" } }
+      }
+    }
+  });
+
+  pieChart = new Chart($("pieChart"), {
+    type: "pie",
+    data: {
+      labels: ["Gastos", "Sobra"],
+      datasets: [{
+        data: [gastos, sobra],
+        backgroundColor: ["#ef4444","#22c55e"]
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: isDark ? "#e5e7eb" : "#1f2937" } }
+      }
+    }
+  });
 }
 
 /* ======================================================
-   DASHBOARD
+   DASHBOARD DE CARTÕES
 ====================================================== */
 function renderDashboardCartoes() {
   if (cartaoChart) cartaoChart.destroy();
@@ -275,7 +346,7 @@ function renderDashboardCartoes() {
   cartaoChart = new Chart($("cartaoChart"), {
     type: "pie",
     data: { labels: Object.keys(dados), datasets: [{ data: Object.values(dados) }] },
-    options: { responsive: false }
+    options: { responsive: true }
   });
 }
 
@@ -288,19 +359,24 @@ function renderGraficoAssinaturas() {
   lancamentos.filter(l => l.categoria === "Assinatura" && l.mesRef === mesAtivo && l.anoRef === anoAtivo)
     .forEach(l => dados[l.descricao] = (dados[l.descricao] || 0) + l.valor);
 
-  if (!Object.keys(dados).length) return;
+  if (!Object.keys(dados).length) {
+    impactoAssinaturas.innerHTML = "";
+    return;
+  }
 
   assinaturaChart = new Chart($("assinaturaChart"), {
     type: "pie",
     data: { labels: Object.keys(dados), datasets: [{ data: Object.values(dados) }] },
-    options: { responsive: false }
+    options: { responsive: true }
   });
 
   const total = Object.values(dados).reduce((a,b)=>a+b,0);
   const rendaTotal = (rendaPrincipal[`${mesAtivo}-${anoAtivo}`] || 0) +
-    rendasExtras.filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo).reduce((a,b)=>a+b.valor,0);
+    rendasExtras.filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo)
+      .reduce((a,b)=>a+b.valor,0);
 
-  impactoAssinaturas.innerHTML = `Assinaturas: R$ ${total.toFixed(2)} (${((total/rendaTotal)*100||0).toFixed(1)}%)`;
+  impactoAssinaturas.innerHTML =
+    `Assinaturas: R$ ${total.toFixed(2)} (${((total / rendaTotal) * 100 || 0).toFixed(1)}%)`;
 }
 
 /* ======================================================
@@ -316,36 +392,26 @@ function renderTabela() {
           <td>${l.categoria}</td>
           <td>${l.descricao}${l.totalParcelas ? ` (${l.parcelaAtual}/${l.totalParcelas})` : ""}</td>
           <td>R$ ${l.valor.toFixed(2)}</td>
-          <td>${cartoes.find(c=>c.id===l.cartaoId)?.nome||"-"}</td>
+          <td>${cartoes.find(c=>c.id===l.cartaoId)?.nome || "-"}</td>
           <td><button class="btn-delete" onclick="excluirLancamento('${l.id}')">🗑️</button></td>
         </tr>`;
     });
 }
 
 function excluirLancamento(id) {
+  if (!confirm("Excluir lançamento?")) return;
   lancamentos = lancamentos.filter(l => l.id !== id);
   localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
   renderTudo();
 }
 
 /* ======================================================
-   GRÁFICOS GERAIS
-====================================================== */
-function renderResumo() {
-  const renda = rendaPrincipal[`${mesAtivo}-${anoAtivo}`] || 0;
-  const extra = rendasExtras.filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo).reduce((a,b)=>a+b.valor,0);
-  const gastos = lancamentos.filter(l => l.mesRef === mesAtivo && l.anoRef === anoAtivo).reduce((a,b)=>a+b.valor,0);
-  rendaEl.textContent = `R$ ${renda.toFixed(2)}`;
-  rendaExtraEl.textContent = `R$ ${extra.toFixed(2)}`;
-  gastosEl.textContent = `R$ ${gastos.toFixed(2)}`;
-  sobraEl.textContent = `R$ ${(renda+extra-gastos).toFixed(2)}`;
-}
-
-/* ======================================================
    BACKUP COMPLETO
 ====================================================== */
 function exportarBackup() {
-  const backup = { estado: { cartoes, lancamentos, assinaturas, rendaPrincipal, rendasExtras, mesAtivo, anoAtivo } };
+  const backup = {
+    estado: { cartoes, lancamentos, assinaturas, rendaPrincipal, rendasExtras, mesAtivo, anoAtivo }
+  };
   const blob = new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -366,6 +432,7 @@ function importarBackup() {
     rendasExtras = d.rendasExtras || [];
     mesAtivo = d.mesAtivo || mesAtivo;
     anoAtivo = d.anoAtivo || anoAtivo;
+
     localStorage.setItem("cartoes", JSON.stringify(cartoes));
     localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
     localStorage.setItem("assinaturas", JSON.stringify(assinaturas));
