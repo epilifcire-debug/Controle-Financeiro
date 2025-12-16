@@ -11,12 +11,13 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- jsPDF -->
+  <!-- jsPDF (uso futuro) -->
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 
 <body>
 
+<!-- ================= HEADER ================= -->
 <header>
   <h1>💰 Controle Financeiro</h1>
   <button id="toggleTheme" class="theme-btn">🌙</button>
@@ -65,44 +66,23 @@
     <ul id="listaRendasExtras"></ul>
   </section>
 
-  <!-- ================= CADASTRO DE CARTÕES ================= -->
-  <section class="input-section">
-    <h2>💳 Cadastro de Cartões</h2>
-    <div class="form">
-      <input id="cartaoNome" placeholder="Nome do cartão">
-      <input id="cartaoFechamento" type="number" min="1" max="31" placeholder="Dia de fechamento">
-      <input id="cartaoVencimento" type="number" min="1" max="31" placeholder="Dia de vencimento">
-      <button onclick="salvarCartao()">Salvar Cartão</button>
-    </div>
-    <ul id="listaCartoes"></ul>
-  </section>
-
-  <!-- ================= ASSINATURAS ================= -->
-  <section class="input-section">
-    <h2>🔁 Assinaturas de Plataforma</h2>
-    <div class="form">
-      <input id="assinaturaDescricao" placeholder="Descrição (Netflix, Spotify...)">
-      <input id="assinaturaValor" type="number" step="0.01" placeholder="Valor mensal">
-      <select id="assinaturaCartao"></select>
-      <button onclick="salvarAssinatura()">Salvar Assinatura</button>
-    </div>
-    <ul id="listaAssinaturas"></ul>
-  </section>
-
   <!-- ================= DASHBOARD ================= -->
   <section class="cards">
     <div class="card blue">
       <h3>💼 Renda</h3>
       <p id="rendaEl">R$ 0,00</p>
     </div>
+
     <div class="card yellow">
       <h3>💛 Renda Extra</h3>
       <p id="rendaExtraEl">R$ 0,00</p>
     </div>
+
     <div class="card red">
       <h3>💸 Gastos</h3>
       <p id="gastosEl">R$ 0,00</p>
     </div>
+
     <div class="card green">
       <h3>💰 Sobra</h3>
       <p id="sobraEl">R$ 0,00</p>
@@ -119,7 +99,54 @@
     </div>
   </section>
 
-  <!-- ================= GRÁFICO ASSINATURAS ================= -->
+  <!-- ================= CARTÕES ================= -->
+  <section class="input-section">
+    <h2>💳 Cartões</h2>
+    <div class="form">
+      <input id="cartaoNome" placeholder="Nome do cartão">
+      <input id="cartaoFechamento" type="number" min="1" max="31" placeholder="Fechamento">
+      <input id="cartaoVencimento" type="number" min="1" max="31" placeholder="Vencimento">
+      <button onclick="salvarCartao()">Salvar Cartão</button>
+    </div>
+    <ul id="listaCartoes"></ul>
+  </section>
+
+  <!-- ================= COMPRA PARCELADA ================= -->
+  <section class="input-section">
+    <h2>🛒 Compra Parcelada</h2>
+    <div class="form">
+      <select id="compraCartao"></select>
+      <input id="compraDescricao" placeholder="Descrição">
+      <input id="compraValor" type="number" placeholder="Valor total">
+      <input id="compraParcelas" type="number" placeholder="Parcelas">
+      <input id="compraMes" type="number" min="1" max="12" placeholder="Mês inicial">
+      <input id="compraAno" type="number" placeholder="Ano inicial">
+      <button onclick="
+        registrarCompraParcelada(
+          compraCartao.value,
+          compraDescricao.value,
+          +compraValor.value,
+          +compraParcelas.value,
+          +compraMes.value,
+          +compraAno.value
+        )
+      ">Registrar</button>
+    </div>
+  </section>
+
+  <!-- ================= ASSINATURAS ================= -->
+  <section class="input-section">
+    <h2>🔁 Assinaturas</h2>
+    <div class="form">
+      <input id="assinaturaDescricao" placeholder="Descrição (Netflix, Spotify)">
+      <input id="assinaturaValor" type="number" step="0.01" placeholder="Valor mensal">
+      <select id="assinaturaCartao"></select>
+      <button onclick="salvarAssinatura()">Salvar Assinatura</button>
+    </div>
+    <ul id="listaAssinaturas"></ul>
+  </section>
+
+  <!-- ================= ASSINATURAS – GRÁFICO ================= -->
   <section class="input-section">
     <h2>📊 Assinaturas x Renda</h2>
     <div class="charts">
@@ -127,7 +154,7 @@
         <canvas id="assinaturaChart" width="360" height="260"></canvas>
       </div>
     </div>
-    <div id="impactoAssinaturas" style="margin-top:1rem;font-weight:600;"></div>
+    <div id="impactoAssinaturas"></div>
   </section>
 
   <!-- ================= LANÇAMENTOS ================= -->
@@ -154,6 +181,7 @@
   <p>Controle Financeiro • GitHub Pages</p>
 </footer>
 
-<script src="script.js"></script>
+<!-- SCRIPT (defer evita erros de DOM) -->
+<script src="script.js" defer></script>
 </body>
 </html>
