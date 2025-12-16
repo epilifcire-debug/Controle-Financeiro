@@ -191,6 +191,7 @@ button:hover {
   font-weight: bold;
 }
 
+/* cores dos cards */
 .blue {
   background: linear-gradient(135deg, #3b82f6, #1d4ed8);
 }
@@ -270,48 +271,52 @@ footer {
 }
 
 /* =====================================================
-   DARK MODE — APRIMORADO
+   DARK MODE — FINAL AJUSTADO
 ===================================================== */
-
 body.dark {
-  background: #0a0f1b;        /* fundo escuro mas não preto absoluto */
-  color: #e2e8f0;            /* texto claro */
-}
-
-/* header e footer */
-body.dark header,
-body.dark footer {
-  background: #131a2b;       /* tom consistente com o restante */
+  background: #0a0f1b;
   color: #e2e8f0;
 }
 
-/* seções principais */
+body.dark header,
+body.dark footer {
+  background: #131a2b;
+}
+
 body.dark .input-section,
 body.dark .tabela,
 body.dark .backup {
-  background: #111827;       /* fundo escuro de superfície */
-  border: 1px solid #374151; /* borda visível contra fundo */
+  background: #111827;
+  border: 1px solid #374151;
 }
 
-/* cards com contraste reforçado */
 body.dark .card {
-  background: #1e293b;       /* cor de card mais clara que o fundo geral */
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+  background: #1e293b;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.6);
 }
 
-/* chart-box mais destacado */
 body.dark .chart-box {
   background: #1e293b;
   border: 1px solid #4b5563;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.6);
 }
 
-/* tabela cabeçalho */
+/* 🔧 CORREÇÃO DEFINITIVA — RENDA EXTRA */
+body.dark .card.yellow {
+  background: linear-gradient(135deg, #fde047, #facc15);
+  color: #020617;
+}
+
+body.dark .card.yellow h3,
+body.dark .card.yellow p {
+  color: #020617;
+}
+
+/* tabelas */
 body.dark table thead {
   background: #1e293b;
 }
 
-/* linhas da tabela */
 body.dark tbody tr {
   background: #0f172a;
   border-bottom: 1px solid #374151;
@@ -330,29 +335,12 @@ body.dark .form input[type="file"] {
   border: 1px solid #4b5563;
 }
 
-body.dark .form input::placeholder,
-body.dark .form select::placeholder {
-  color: #94a3b8;
-}
-
-/* botões */
-body.dark button {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
-}
-
-/* texto dentro de cards e listas */
+/* listas */
 body.dark #listaCartoes li,
 body.dark #listaRendasExtras li,
 body.dark #listaAssinaturas li {
   background: #1e293b;
   border: 1px solid #374151;
-  color: #e2e8f0;
-}
-
-/* impacto assinaturas */
-body.dark #impactoAssinaturas {
-  background: #1e293b;
-  border: 1px solid #4b5563;
   color: #e2e8f0;
 }
 
@@ -377,5 +365,3 @@ body.dark #impactoAssinaturas {
     font-size: 0.85rem;
   }
 }
-
-
