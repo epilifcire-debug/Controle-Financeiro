@@ -133,19 +133,11 @@ button:hover {
   font-size: 0.8rem;
 }
 
-.btn-delete:hover {
-  background: #b91c1c;
-}
-
 .btn-edit {
   background: #2563eb;
   padding: 6px 10px;
   font-size: 0.8rem;
   margin-right: 6px;
-}
-
-.btn-edit:hover {
-  background: #1e40af;
 }
 
 /* =====================================================
@@ -278,36 +270,52 @@ footer {
 }
 
 /* =====================================================
-   DARK MODE — VISUAL PREMIUM
+   🌙 DARK MODE — PREMIUM & CONFORTÁVEL
 ===================================================== */
 body.dark {
   background: #020617;
   color: #e5e7eb;
 }
 
+/* Header / Footer */
 body.dark header,
 body.dark footer {
   background: linear-gradient(135deg, #020617, #020617);
 }
 
+/* Seções */
 body.dark .input-section,
 body.dark .tabela,
 body.dark .backup {
-  background: #0f172a;
+  background: #0b1220;
   border: 1px solid #334155;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.65);
 }
 
+/* Cards */
 body.dark .card {
-  background: linear-gradient(135deg, #1e293b, #0f172a);
-  box-shadow: 0 18px 40px rgba(0,0,0,0.7);
+  background: linear-gradient(135deg, #1e293b, #0b1220);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 20px 45px rgba(0,0,0,0.8);
 }
 
+/* Gráficos */
 body.dark .chart-box {
-  background: #0f172a;
-  border: 1px solid #334155;
-  box-shadow: 0 16px 36px rgba(0,0,0,0.7);
+  background: #111827;
+  border: 1px solid #475569;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.8);
 }
 
+/* Inputs */
+body.dark .form input,
+body.dark .form select,
+body.dark .form input[type="file"] {
+  background: #020617;
+  color: #e5e7eb;
+  border-color: #475569;
+}
+
+/* Tabela */
 body.dark table thead {
   background: #1e293b;
 }
@@ -320,53 +328,13 @@ body.dark tbody tr:hover {
   background: #1e293b;
 }
 
-body.dark .form input,
-body.dark .form select,
-body.dark .form input[type="file"] {
-  background: #020617;
-  color: #e5e7eb;
-  border-color: #334155;
-}
-
-body.dark button {
-  box-shadow: 0 8px 22px rgba(0,0,0,0.7);
-}
-
-body.dark .card.blue {
-  background: linear-gradient(135deg, #2563eb, #1e40af);
-}
-
-body.dark .card.yellow {
-  background: linear-gradient(135deg, #fde047, #eab308);
-  color: #1f2937;
-}
-
-body.dark .card.red {
-  background: linear-gradient(135deg, #ef4444, #b91c1c);
-}
-
-body.dark .card.green {
-  background: linear-gradient(135deg, #22c55e, #15803d);
-}
-
-/* =====================================================
-   SEÇÕES COM MAIS CONTRASTE
-===================================================== */
-body.dark .input-section,
-body.dark .tabela,
-body.dark .backup {
-  background: #0f172a;            /* levemente mais claro que o body */
-  border: 1px solid #334155;
-}
-
-/* =====================================================
-   TEXTO GERAL MAIS LEGÍVEL
-===================================================== */
+/* Texto */
 body.dark p,
 body.dark span,
 body.dark td,
 body.dark th,
-body.dark li {
+body.dark li,
+body.dark small {
   color: #e5e7eb;
 }
 
@@ -391,6 +359,3 @@ body.dark li {
     font-size: 0.85rem;
   }
 }
-
-
-
