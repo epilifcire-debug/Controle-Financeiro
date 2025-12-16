@@ -458,9 +458,11 @@ function renderTudo() {
   renderResumo();
   renderGraficoAssinaturas();
 }
-
+window.exportarBackup = exportarBackup;
+window.importarBackup = importarBackup;
 window.editarCartao = editarCartao;
 window.excluirCartao = excluirCartao;
 window.salvarCartao = salvarCartao;
 
 renderTudo();
+
