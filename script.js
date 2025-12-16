@@ -1,29 +1,33 @@
 /* ======================================================
-   ESTADO GLOBAL
+   CONTROLE FINANCEIRO — SCRIPT FINAL
+   Versão limpa, comentada e estável
 ====================================================== */
-let cartoes = JSON.parse(localStorage.getItem("cartoes")) || [];
-let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
-let assinaturas = JSON.parse(localStorage.getItem("assinaturas")) || [];
+
+/* ======================================================
+   ESTADO GLOBAL (LOCALSTORAGE)
+====================================================== */
+let cartoes        = JSON.parse(localStorage.getItem("cartoes"))        || [];
+let lancamentos    = JSON.parse(localStorage.getItem("lancamentos"))    || [];
+let assinaturas    = JSON.parse(localStorage.getItem("assinaturas"))    || [];
 let rendaPrincipal = JSON.parse(localStorage.getItem("rendaPrincipal")) || {};
-let rendasExtras = JSON.parse(localStorage.getItem("rendasExtras")) || [];
+let rendasExtras   = JSON.parse(localStorage.getItem("rendasExtras"))   || [];
 
 let mesAtivo = new Date().getMonth() + 1;
 let anoAtivo = new Date().getFullYear();
 
 let cartaoEditandoId = null;
+
+/* Gráficos */
 let barChart = null;
 let pieChart = null;
 let cartaoChart = null;
 let assinaturaChart = null;
 
 /* ======================================================
-   DOM
+   UTILIDADES
 ====================================================== */
 const $ = id => document.getElementById(id);
 
-/* ======================================================
-   UTIL
-====================================================== */
 const gerarId = () =>
   "id_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
 
@@ -31,7 +35,7 @@ const corTextoGrafico = () =>
   document.body.classList.contains("dark") ? "#e5e7eb" : "#1f2937";
 
 /* ======================================================
-   TEMA
+   TEMA (CLARO / ESCURO)
 ====================================================== */
 const themeBtn = $("toggleTheme");
 
@@ -51,7 +55,7 @@ themeBtn.onclick = () => {
 };
 
 /* ======================================================
-   MÊS
+   MÊS ATIVO
 ====================================================== */
 $("mesAtivo").value = mesAtivo;
 $("anoAtivo").value = anoAtivo;
@@ -93,6 +97,25 @@ function adicionarRendaExtra() {
   renderTudo();
 }
 
+function excluirRendaExtra(id) {
+  rendasExtras = rendasExtras.filter(r => r.id !== id);
+  localStorage.setItem("rendasExtras", JSON.stringify(rendasExtras));
+  renderTudo();
+}
+
+function renderRendasExtras() {
+  $("listaRendasExtras").innerHTML = "";
+  rendasExtras
+    .filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo)
+    .forEach(r => {
+      $("listaRendasExtras").innerHTML += `
+        <li>
+          ${r.descricao} — R$ ${r.valor.toFixed(2)}
+          <button class="btn-delete" onclick="excluirRendaExtra('${r.id}')">🗑️</button>
+        </li>`;
+    });
+}
+
 /* ======================================================
    CARTÕES
 ====================================================== */
@@ -104,25 +127,16 @@ function salvarCartao() {
 
   if (cartaoEditandoId) {
     const c = cartoes.find(c => c.id === cartaoEditandoId);
-    if (c) {
-      c.nome = nome;
-      c.fechamento = fechamento;
-      c.vencimento = vencimento;
-    }
+    c.nome = nome;
+    c.fechamento = fechamento;
+    c.vencimento = vencimento;
     cartaoEditandoId = null;
   } else {
-    cartoes.push({
-      id: gerarId(),
-      nome,
-      fechamento,
-      vencimento
-    });
+    cartoes.push({ id: gerarId(), nome, fechamento, vencimento });
   }
 
   localStorage.setItem("cartoes", JSON.stringify(cartoes));
-  $("cartaoNome").value = "";
-  $("cartaoFechamento").value = "";
-  $("cartaoVencimento").value = "";
+  $("cartaoNome").value = $("cartaoFechamento").value = $("cartaoVencimento").value = "";
   renderTudo();
 }
 
@@ -138,27 +152,99 @@ function editarCartao(id) {
 function excluirCartao(id) {
   if (!confirm("Excluir cartão?")) return;
   cartoes = cartoes.filter(c => c.id !== id);
-  lancamentos = lancamentos.map(l =>
-    l.cartaoId === id ? { ...l, cartaoId: null } : l
-  );
+  lancamentos = lancamentos.map(l => l.cartaoId === id ? { ...l, cartaoId: null } : l);
   localStorage.setItem("cartoes", JSON.stringify(cartoes));
   localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
   renderTudo();
 }
 
+function renderCartoes() {
+  $("listaCartoes").innerHTML = "";
+  $("cartaoDashboard").innerHTML = `<option value="">Todos</option>`;
+  $("compraCartao").innerHTML = "";
+  $("assinaturaCartao").innerHTML = "";
+
+  cartoes.forEach(c => {
+    $("listaCartoes").innerHTML += `
+      <li>
+        <div>
+          <strong>${c.nome}</strong><br>
+          <small>Fechamento ${c.fechamento} | Vencimento ${c.vencimento}</small>
+        </div>
+        <div>
+          <button class="btn-edit" onclick="editarCartao('${c.id}')">✏️</button>
+          <button class="btn-delete" onclick="excluirCartao('${c.id}')">🗑️</button>
+        </div>
+      </li>`;
+    $("cartaoDashboard").innerHTML += `<option value="${c.id}">${c.nome}</option>`;
+    $("compraCartao").innerHTML += `<option value="${c.id}">${c.nome}</option>`;
+    $("assinaturaCartao").innerHTML += `<option value="${c.id}">${c.nome}</option>`;
+  });
+}
+
 /* ======================================================
-   GRÁFICOS PRINCIPAIS
+   ASSINATURAS
+====================================================== */
+function salvarAssinatura() {
+  const d = $("assinaturaDescricao").value;
+  const v = +$("assinaturaValor").value;
+  const c = $("assinaturaCartao").value;
+  if (!d || !v || !c) return;
+
+  assinaturas.push({ id: gerarId(), descricao: d, valor: v, cartaoId: c, ativa: true });
+  localStorage.setItem("assinaturas", JSON.stringify(assinaturas));
+  $("assinaturaDescricao").value = $("assinaturaValor").value = "";
+  renderTudo();
+}
+
+function renderAssinaturas() {
+  $("listaAssinaturas").innerHTML = "";
+  assinaturas.forEach(a => {
+    $("listaAssinaturas").innerHTML += `
+      <li>
+        ${a.descricao} — R$ ${a.valor.toFixed(2)}
+      </li>`;
+  });
+}
+
+/* ======================================================
+   TABELA DE LANÇAMENTOS
+====================================================== */
+function renderTabela() {
+  $("tabela").innerHTML = "";
+  lancamentos
+    .filter(l => l.mesRef === mesAtivo && l.anoRef === anoAtivo)
+    .forEach(l => {
+      $("tabela").innerHTML += `
+        <tr>
+          <td>${l.tipo || "-"}</td>
+          <td>${l.categoria || "-"}</td>
+          <td>${l.descricao}</td>
+          <td>R$ ${l.valor.toFixed(2)}</td>
+          <td>${cartoes.find(c => c.id === l.cartaoId)?.nome || "-"}</td>
+          <td>
+            <button class="btn-delete" onclick="excluirLancamento('${l.id}')">🗑️</button>
+          </td>
+        </tr>`;
+    });
+}
+
+function excluirLancamento(id) {
+  if (!confirm("Excluir lançamento?")) return;
+  lancamentos = lancamentos.filter(l => l.id !== id);
+  localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+  renderTudo();
+}
+
+/* ======================================================
+   GRÁFICOS E RESUMO
 ====================================================== */
 function renderResumo() {
   const renda = rendaPrincipal[`${mesAtivo}-${anoAtivo}`] || 0;
-  const extra = rendasExtras
-    .filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo)
-    .reduce((a, b) => a + b.valor, 0);
-
-  const gastos = lancamentos
-    .filter(l => l.mesRef === mesAtivo && l.anoRef === anoAtivo)
-    .reduce((a, b) => a + b.valor, 0);
-
+  const extra = rendasExtras.filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo)
+    .reduce((a,b)=>a+b.valor,0);
+  const gastos = lancamentos.filter(l => l.mesRef === mesAtivo && l.anoRef === anoAtivo)
+    .reduce((a,b)=>a+b.valor,0);
   const sobra = renda + extra - gastos;
 
   $("rendaEl").textContent = `R$ ${renda.toFixed(2)}`;
@@ -173,18 +259,7 @@ function renderResumo() {
     type: "bar",
     data: {
       labels: ["Renda", "Extra", "Gastos", "Sobra"],
-      datasets: [{
-        data: [renda, extra, gastos, sobra],
-        backgroundColor: ["#2563eb", "#facc15", "#dc2626", "#16a34a"]
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: corTextoGrafico(), font: { weight: "600" } } },
-        y: { ticks: { color: corTextoGrafico(), font: { weight: "600" } } }
-      }
+      datasets: [{ data: [renda, extra, gastos, sobra] }]
     }
   });
 
@@ -192,192 +267,78 @@ function renderResumo() {
     type: "pie",
     data: {
       labels: ["Gastos", "Sobra"],
-      datasets: [{
-        data: [gastos, sobra],
-        backgroundColor: ["#dc2626", "#16a34a"]
-      }]
-    },
-    options: {
-      plugins: {
-        legend: {
-          labels: {
-            color: corTextoGrafico(),
-            font: { weight: "600" }
-          }
-        }
-      }
+      datasets: [{ data: [gastos, sobra] }]
     }
   });
 }
 
-/* ======================================================
-   DASHBOARD CARTÕES
-====================================================== */
-function renderDashboardCartoes() {
-  if (cartaoChart) cartaoChart.destroy();
-  const filtro = $("cartaoDashboard").value;
-  const dados = {};
-
-  lancamentos
-    .filter(l =>
-      l.categoria === "Cartão" &&
-      l.mesRef === mesAtivo &&
-      l.anoRef === anoAtivo &&
-      (!filtro || l.cartaoId === filtro)
-    )
-    .forEach(l => {
-      const nome =
-        cartoes.find(c => c.id === l.cartaoId)?.nome || "Sem cartão";
-      dados[nome] = (dados[nome] || 0) + l.valor;
-    });
-
-  if (!Object.keys(dados).length) return;
-
-  cartaoChart = new Chart($("cartaoChart"), {
-    type: "pie",
-    data: {
-      labels: Object.keys(dados),
-      datasets: [{ data: Object.values(dados) }]
-    },
-    options: {
-      plugins: {
-        legend: { labels: { color: corTextoGrafico() } }
-      }
-    }
-  });
-}
-
-/* ======================================================
-   ASSINATURAS × RENDA
-====================================================== */
-function renderGraficoAssinaturas() {
-  if (assinaturaChart) assinaturaChart.destroy();
-  const dados = {};
-
-  lancamentos
-    .filter(l =>
-      l.categoria === "Assinatura" &&
-      l.mesRef === mesAtivo &&
-      l.anoRef === anoAtivo
-    )
-    .forEach(l => {
-      dados[l.descricao] = (dados[l.descricao] || 0) + l.valor;
-    });
-
-  if (!Object.keys(dados).length) return;
-
-  assinaturaChart = new Chart($("assinaturaChart"), {
-    type: "pie",
-    data: {
-      labels: Object.keys(dados),
-      datasets: [{ data: Object.values(dados) }]
-    },
-    options: {
-      plugins: {
-        legend: { labels: { color: corTextoGrafico() } }
-      }
-    }
-  });
-}
 /* ======================================================
    BACKUP COMPLETO
 ====================================================== */
 function exportarBackup() {
   const backup = {
-    meta: {
-      criadoEm: new Date().toISOString(),
-      versao: "1.0"
-    },
-    estado: {
-      cartoes,
-      lancamentos,
-      assinaturas,
-      rendaPrincipal,
-      rendasExtras,
-      mesAtivo,
-      anoAtivo
-    }
+    cartoes,
+    lancamentos,
+    assinaturas,
+    rendaPrincipal,
+    rendasExtras
   };
-
-  const blob = new Blob(
-    [JSON.stringify(backup, null, 2)],
-    { type: "application/json" }
-  );
-
-  const url = URL.createObjectURL(blob);
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
-  a.href = url;
-  a.download = `backup_financeiro_${mesAtivo}_${anoAtivo}.json`;
+  a.href = URL.createObjectURL(blob);
+  a.download = "backup_financeiro.json";
   a.click();
-  URL.revokeObjectURL(url);
 }
 
 function importarBackup() {
-  const input = document.getElementById("importFile");
-  const file = input?.files?.[0];
-
-  if (!file) {
-    alert("Selecione um arquivo de backup.");
-    return;
-  }
+  const file = $("importFile").files[0];
+  if (!file) return alert("Selecione um arquivo.");
 
   const reader = new FileReader();
   reader.onload = e => {
-    try {
-      const data = JSON.parse(e.target.result);
+    const d = JSON.parse(e.target.result);
+    cartoes = d.cartoes || [];
+    lancamentos = d.lancamentos || [];
+    assinaturas = d.assinaturas || [];
+    rendaPrincipal = d.rendaPrincipal || {};
+    rendasExtras = d.rendasExtras || [];
 
-      if (!data.estado) {
-        alert("Arquivo de backup inválido.");
-        return;
-      }
+    localStorage.setItem("cartoes", JSON.stringify(cartoes));
+    localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+    localStorage.setItem("assinaturas", JSON.stringify(assinaturas));
+    localStorage.setItem("rendaPrincipal", JSON.stringify(rendaPrincipal));
+    localStorage.setItem("rendasExtras", JSON.stringify(rendasExtras));
 
-      if (!confirm("Importar backup completo e substituir todos os dados?")) return;
-
-      cartoes = data.estado.cartoes || [];
-      lancamentos = data.estado.lancamentos || [];
-      assinaturas = data.estado.assinaturas || [];
-      rendaPrincipal = data.estado.rendaPrincipal || {};
-      rendasExtras = data.estado.rendasExtras || [];
-      mesAtivo = data.estado.mesAtivo || mesAtivo;
-      anoAtivo = data.estado.anoAtivo || anoAtivo;
-
-      localStorage.setItem("cartoes", JSON.stringify(cartoes));
-      localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
-      localStorage.setItem("assinaturas", JSON.stringify(assinaturas));
-      localStorage.setItem("rendaPrincipal", JSON.stringify(rendaPrincipal));
-      localStorage.setItem("rendasExtras", JSON.stringify(rendasExtras));
-
-      document.getElementById("mesAtivo").value = mesAtivo;
-      document.getElementById("anoAtivo").value = anoAtivo;
-
-      renderTudo();
-      alert("Backup restaurado com sucesso!");
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao importar backup.");
-    }
+    renderTudo();
   };
-
   reader.readAsText(file);
 }
+
 /* ======================================================
-   INIT
+   RENDER GERAL
 ====================================================== */
 function renderTudo() {
   renderResumo();
-  renderDashboardCartoes();
-  renderGraficoAssinaturas();
+  renderRendasExtras();
+  renderCartoes();
+  renderAssinaturas();
+  renderTabela();
 }
 
-$("cartaoDashboard").addEventListener("change", renderDashboardCartoes);
-
+/* ======================================================
+   EXPORTA FUNÇÕES PARA O HTML
+====================================================== */
+window.salvarRendaPrincipal = salvarRendaPrincipal;
+window.adicionarRendaExtra = adicionarRendaExtra;
 window.salvarCartao = salvarCartao;
 window.editarCartao = editarCartao;
 window.excluirCartao = excluirCartao;
-window.salvarRendaPrincipal = salvarRendaPrincipal;
-window.adicionarRendaExtra = adicionarRendaExtra;
+window.salvarAssinatura = salvarAssinatura;
 window.atualizarMesAtivo = atualizarMesAtivo;
-window.importarBackup = importarBackup;
 window.exportarBackup = exportarBackup;
-renderTudo();
+window.importarBackup = importarBackup;
 
+/* ======================================================
+   INIT
+====================================================== */
+renderTudo();
