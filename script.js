@@ -130,7 +130,7 @@ function renderRendasExtras() {
 }
 
 /* ======================================================
-   CARTÕES (COM EDITAR)
+   CARTÕES (EDITAR / EXCLUIR CORRIGIDO)
 ====================================================== */
 function salvarCartao() {
   if (!cartaoNome.value || !cartaoFechamento.value || !cartaoVencimento.value) return;
@@ -168,14 +168,21 @@ function editarCartao(id) {
 }
 
 function excluirCartao(id) {
-  if (lancamentos.some(l => l.cartaoId === id)) {
-    alert("Este cartão possui lançamentos.");
-    return;
-  }
-  if (!confirm("Excluir cartão?")) return;
+  if (!confirm("Excluir este cartão?")) return;
+
+  // mantém histórico dos lançamentos
+  lancamentos = lancamentos.map(l => {
+    if (l.cartaoId === id) {
+      return { ...l, cartaoId: null };
+    }
+    return l;
+  });
 
   cartoes = cartoes.filter(c => c.id !== id);
+
   localStorage.setItem("cartoes", JSON.stringify(cartoes));
+  localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+
   renderTudo();
 }
 
@@ -320,7 +327,7 @@ function renderAssinaturas() {
     const cartao = cartoes.find(c => c.id === a.cartaoId);
     listaAssinaturas.innerHTML += `
       <li style="opacity:${a.ativa ? 1 : 0.5}">
-        ${a.descricao} — R$ ${a.valor.toFixed(2)} (${cartao?.nome || "-"})
+        ${a.descricao} — R$ ${a.valor.toFixed(2)} (${cartao?.nome || "Cartão removido"})
         ${a.ativa ? `<button class="btn-delete" onclick="desativarAssinatura('${a.id}')">Parar</button>` : "(inativa)"}
       </li>`;
   });
@@ -426,7 +433,7 @@ function renderTabela() {
           <td>${l.categoria || "-"}</td>
           <td>${l.descricao}${l.totalParcelas ? ` (${l.parcelaAtual}/${l.totalParcelas})` : ""}</td>
           <td>R$ ${l.valor.toFixed(2)}</td>
-          <td>${cartao?.nome || "-"}</td>
+          <td>${cartao?.nome || "Cartão removido"}</td>
           <td><button class="btn-delete" onclick="excluirLancamento('${l.id}')">🗑️</button></td>
         </tr>`;
     });
@@ -451,8 +458,9 @@ function renderTudo() {
   renderResumo();
   renderGraficoAssinaturas();
 }
+
 window.editarCartao = editarCartao;
 window.excluirCartao = excluirCartao;
 window.salvarCartao = salvarCartao;
-renderTudo();
 
+renderTudo();
