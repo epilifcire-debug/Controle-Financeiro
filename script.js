@@ -447,6 +447,7 @@ function renderTudo() {
   renderTabela();
   renderResumo();
   renderDashboardCartoes();
+  renderGraficoAssinaturas();
 }
 
 $("cartaoDashboard").addEventListener("change", renderDashboardCartoes);
@@ -463,3 +464,4 @@ window.exportarBackup = exportarBackup;
 window.importarBackup = importarBackup;
 
 renderTudo();
+
