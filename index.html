@@ -51,6 +51,7 @@
   <!-- ================= RENDA ================= -->
   <section class="input-section">
     <h2>💼 Renda do Mês</h2>
+
     <div class="form">
       <input id="rendaPrincipal" type="number" placeholder="Renda principal">
       <button type="button" onclick="salvarRendaPrincipal()">Salvar Renda</button>
@@ -89,13 +90,13 @@
     </div>
   </section>
 
-  <!-- ================= GRÁFICOS ================= -->
+  <!-- ================= GRÁFICOS GERAIS ================= -->
   <section class="charts">
     <div class="chart-box">
-      <canvas id="barChart" width="360" height="260"></canvas>
+      <canvas id="barChart"></canvas>
     </div>
     <div class="chart-box">
-      <canvas id="pieChart" width="360" height="260"></canvas>
+      <canvas id="pieChart"></canvas>
     </div>
   </section>
 
@@ -109,7 +110,7 @@
     </div>
     <div class="charts">
       <div class="chart-box">
-        <canvas id="cartaoChart" width="360" height="260"></canvas>
+        <canvas id="cartaoChart"></canvas>
       </div>
     </div>
   </section>
@@ -161,12 +162,12 @@
     <ul id="listaAssinaturas"></ul>
   </section>
 
-  <!-- ================= ASSINATURAS – GRÁFICO ================= -->
+  <!-- ================= ASSINATURAS × RENDA ================= -->
   <section class="input-section">
     <h2>📊 Assinaturas x Renda</h2>
     <div class="charts">
       <div class="chart-box">
-        <canvas id="assinaturaChart" width="360" height="260"></canvas>
+        <canvas id="assinaturaChart"></canvas>
       </div>
     </div>
     <div id="impactoAssinaturas"></div>
@@ -198,11 +199,6 @@
       <input type="file" id="importFile" accept=".json">
       <button type="button" onclick="importarBackup()">⬆️ Importar Backup</button>
     </div>
-  </section>
-
-  <!-- ================= FATURA (ESTRUTURAL / OCULTA) ================= -->
-  <section style="display:none">
-    <select id="faturaCartao"></select>
   </section>
 
 </main>
