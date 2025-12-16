@@ -11,7 +11,7 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- jsPDF (para futuras expansões) -->
+  <!-- jsPDF -->
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 
@@ -48,6 +48,26 @@
       <input id="anoAtivo" type="number" placeholder="Ano">
       <button onclick="atualizarMesAtivo()">Aplicar</button>
     </div>
+  </section>
+
+  <!-- ================= RENDA ================= -->
+  <section class="input-section">
+    <h2>💼 Renda do Mês</h2>
+
+    <div class="form">
+      <input id="rendaPrincipal" type="number" placeholder="Renda principal">
+      <button onclick="salvarRendaPrincipal()">Salvar Renda</button>
+    </div>
+
+    <h3 style="margin-top:1rem;">➕ Rendas Extras</h3>
+
+    <div class="form">
+      <input id="descricaoRendaExtra" placeholder="Descrição da renda extra">
+      <input id="valorRendaExtra" type="number" placeholder="Valor">
+      <button onclick="adicionarRendaExtra()">Adicionar</button>
+    </div>
+
+    <ul id="listaRendasExtras"></ul>
   </section>
 
   <!-- ================= CADASTRO DE CARTÕES ================= -->
@@ -122,9 +142,14 @@
 
   <!-- ================= RESUMO ================= -->
   <section class="cards">
-    <div class="card green">
+    <div class="card blue">
       <h3>💼 Renda</h3>
       <p id="rendaEl">R$ 0,00</p>
+    </div>
+
+    <div class="card yellow">
+      <h3>💛 Renda Extra</h3>
+      <p id="rendaExtraEl">R$ 0,00</p>
     </div>
 
     <div class="card red">
@@ -132,7 +157,7 @@
       <p id="gastosEl">R$ 0,00</p>
     </div>
 
-    <div class="card blue">
+    <div class="card green">
       <h3>💰 Sobra</h3>
       <p id="sobraEl">R$ 0,00</p>
     </div>
@@ -170,7 +195,6 @@
 
     <div class="form">
       <select id="faturaCartao"></select>
-
       <select id="faturaMes">
         <option value="1">Janeiro</option>
         <option value="2">Fevereiro</option>
@@ -237,8 +261,6 @@
   <p>Controle Financeiro • GitHub Pages</p>
 </footer>
 
-<!-- ================= SCRIPT ================= -->
 <script src="script.js"></script>
-
 </body>
 </html>
