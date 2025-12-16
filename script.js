@@ -435,7 +435,87 @@ function importarBackup() {
   };
   reader.readAsText(file);
 }
+/* ======================================================
+   GRÁFICO ASSINATURAS × RENDA (PIZZA)
+====================================================== */
+function renderGraficoAssinaturas() {
+  if (typeof Chart === "undefined") return;
 
+  if (assinaturaChart) {
+    assinaturaChart.destroy();
+    assinaturaChart = null;
+  }
+
+  const dados = {};
+
+  lancamentos
+    .filter(l =>
+      l.categoria === "Assinatura" &&
+      l.mesRef === mesAtivo &&
+      l.anoRef === anoAtivo
+    )
+    .forEach(l => {
+      dados[l.descricao] = (dados[l.descricao] || 0) + l.valor;
+    });
+
+  const labels = Object.keys(dados);
+  const valores = Object.values(dados);
+
+  if (!labels.length) {
+    const box = document.getElementById("impactoAssinaturas");
+    if (box) box.innerHTML = "Nenhuma assinatura ativa neste mês.";
+    return;
+  }
+
+  assinaturaChart = new Chart(document.getElementById("assinaturaChart"), {
+    type: "pie",
+    data: {
+      labels,
+      datasets: [{
+        data: valores,
+        backgroundColor: [
+          "#2563eb",
+          "#facc15",
+          "#ef4444",
+          "#22c55e",
+          "#a855f7",
+          "#ec4899"
+        ]
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          labels: {
+            color: document.body.classList.contains("dark")
+              ? "#e5e7eb"
+              : "#1f2937",
+            font: { weight: "600" }
+          }
+        }
+      }
+    }
+  });
+
+  const totalAssinaturas = valores.reduce((a, b) => a + b, 0);
+  const rendaTotal =
+    (rendaPrincipal[`${mesAtivo}-${anoAtivo}`] || 0) +
+    rendasExtras
+      .filter(r => r.mesRef === mesAtivo && r.anoRef === anoAtivo)
+      .reduce((a, b) => a + b.valor, 0);
+
+  const impacto = rendaTotal
+    ? ((totalAssinaturas / rendaTotal) * 100).toFixed(1)
+    : 0;
+
+  const impactoBox = document.getElementById("impactoAssinaturas");
+  if (impactoBox) {
+    impactoBox.innerHTML =
+      `Assinaturas: <strong>R$ ${totalAssinaturas.toFixed(2)}</strong>
+       (${impacto}% da renda)`;
+  }
+}
 /* ======================================================
    INIT
 ====================================================== */
@@ -464,4 +544,5 @@ window.exportarBackup = exportarBackup;
 window.importarBackup = importarBackup;
 
 renderTudo();
+
 
