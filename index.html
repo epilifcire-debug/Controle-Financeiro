@@ -17,7 +17,6 @@
 
 <body>
 
-<!-- ================= HEADER ================= -->
 <header>
   <h1>💰 Controle Financeiro</h1>
   <button id="toggleTheme" class="theme-btn">🌙</button>
@@ -72,17 +71,14 @@
       <h3>💼 Renda</h3>
       <p id="rendaEl">R$ 0,00</p>
     </div>
-
     <div class="card yellow">
       <h3>💛 Renda Extra</h3>
       <p id="rendaExtraEl">R$ 0,00</p>
     </div>
-
     <div class="card red">
       <h3>💸 Gastos</h3>
       <p id="gastosEl">R$ 0,00</p>
     </div>
-
     <div class="card green">
       <h3>💰 Sobra</h3>
       <p id="sobraEl">R$ 0,00</p>
@@ -102,13 +98,11 @@
   <!-- ================= DASHBOARD DE CARTÕES ================= -->
   <section class="input-section">
     <h2>📊 Dashboard de Cartões</h2>
-
     <div class="form">
       <select id="cartaoDashboard">
         <option value="">Todos os cartões</option>
       </select>
     </div>
-
     <div class="charts">
       <div class="chart-box">
         <canvas id="cartaoChart" width="360" height="260"></canvas>
@@ -190,6 +184,11 @@
       </thead>
       <tbody id="tabela"></tbody>
     </table>
+  </section>
+
+  <!-- ================= FATURA (ESTRUTURAL) ================= -->
+  <section class="input-section" style="display:none">
+    <select id="faturaCartao"></select>
   </section>
 
 </main>
