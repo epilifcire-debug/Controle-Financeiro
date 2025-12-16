@@ -126,30 +126,25 @@ button:hover {
   font-size: 0.8rem;
 }
 
-.btn-edit:hover {
-  background: #2563eb;
-}
-
 .btn-delete {
   background: #e53e3e;
   padding: 6px 10px;
   font-size: 0.8rem;
 }
 
-.btn-delete:hover {
-  background: #c53030;
-}
-
 /* =====================================================
    LISTAS
 ===================================================== */
 #listaCartoes,
-#listaRendasExtras {
+#listaRendasExtras,
+#listaAssinaturas {
   list-style: none;
   margin-top: 1rem;
 }
 
-#listaCartoes li {
+#listaCartoes li,
+#listaRendasExtras li,
+#listaAssinaturas li {
   background: #f1f5f9;
   padding: 12px 14px;
   border-radius: 12px;
@@ -157,20 +152,19 @@ button:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: 0.9rem;
 }
 
 #listaRendasExtras li {
   background: #fefcbf;
-  padding: 10px 14px;
-  border-radius: 10px;
-  margin-bottom: 6px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+}
+
+#listaAssinaturas li {
+  background: #e6fffa;
 }
 
 /* =====================================================
-   CARDS DASHBOARD
+   DASHBOARD CARDS
 ===================================================== */
 .cards {
   display: grid;
@@ -222,7 +216,7 @@ button:hover {
   justify-content: center;
   gap: 30px;
   flex-wrap: wrap;
-  margin: 3rem 0;
+  margin: 2.5rem 0;
 }
 
 .chart-box {
@@ -235,13 +229,14 @@ button:hover {
 }
 
 /* =====================================================
-   FATURA
+   IMPACTO ASSINATURAS
 ===================================================== */
-#totalFatura {
-  margin: 1rem 0;
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #2c7a7b;
+#impactoAssinaturas {
+  background: #edf2f7;
+  padding: 14px;
+  border-radius: 12px;
+  margin-top: 1rem;
+  font-size: 0.95rem;
 }
 
 /* =====================================================
@@ -273,17 +268,6 @@ tbody tr:hover {
 }
 
 /* =====================================================
-   BACKUP
-===================================================== */
-.backup {
-  text-align: center;
-}
-
-.backup button {
-  margin: 0.5rem;
-}
-
-/* =====================================================
    FOOTER
 ===================================================== */
 footer {
@@ -311,7 +295,6 @@ body.dark footer {
 
 body.dark .input-section,
 body.dark .tabela,
-body.dark .backup,
 body.dark .chart-box {
   background: #020617;
   color: #e5e7eb;
@@ -321,7 +304,8 @@ body.dark thead {
   background: #020617;
 }
 
-body.dark #listaCartoes li {
+body.dark #listaCartoes li,
+body.dark #listaAssinaturas li {
   background: #020617;
 }
 
