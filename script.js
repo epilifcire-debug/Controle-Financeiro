@@ -351,6 +351,7 @@ window.salvarAssinatura = salvarAssinatura;
 window.atualizarMesAtivo = atualizarMesAtivo;
 window.exportarBackup = exportarBackup;
 window.importarBackup = importarBackup;
+window.registrarCompraParcelada = registrarCompraParcelada;
 /* ======================================================
    COMPRA PARCELADA (FUNÇÃO AUSENTE)
 ====================================================== */
@@ -399,5 +400,6 @@ function registrarCompraParcelada(
    INIT
 ====================================================== */
 renderTudo();
+
 
 
