@@ -36,7 +36,31 @@ function atualizarResumo() {
   gastosEl.textContent = `R$ ${gastos.toFixed(2)}`;
   sobraEl.textContent = `R$ ${sobra.toFixed(2)}`;
 
+  atualizarTabela(dados);
   atualizarGraficos(renda, gastos, sobra);
+}
+
+function atualizarTabela(dados) {
+  const tbody = document.querySelector("#tabelaLancamentos tbody");
+  tbody.innerHTML = "";
+
+  if (dados.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6">Nenhum lançamento neste mês/ano.</td></tr>`;
+    return;
+  }
+
+  dados.forEach(l => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${l.tipo}</td>
+      <td>${l.categoria}</td>
+      <td>${l.descricao}</td>
+      <td>R$ ${l.valor.toFixed(2)}</td>
+      <td>${l.mes}</td>
+      <td>${l.ano}</td>
+    `;
+    tbody.appendChild(tr);
+  });
 }
 
 function atualizarGraficos(renda, gastos, sobra) {
