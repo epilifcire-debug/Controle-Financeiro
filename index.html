@@ -17,7 +17,6 @@
 
 <body>
 
-<!-- ================= HEADER ================= -->
 <header>
   <h1>💰 Controle Financeiro</h1>
   <button id="toggleTheme" class="theme-btn">🌙</button>
@@ -28,7 +27,6 @@
   <!-- ================= MÊS EM VIGÊNCIA ================= -->
   <section class="input-section">
     <h2>📅 Mês em Vigência</h2>
-
     <div class="form">
       <select id="mesAtivo">
         <option value="1">Janeiro</option>
@@ -44,7 +42,6 @@
         <option value="11">Novembro</option>
         <option value="12">Dezembro</option>
       </select>
-
       <input id="anoAtivo" type="number" placeholder="Ano">
       <button onclick="atualizarMesAtivo()">Aplicar</button>
     </div>
@@ -53,14 +50,12 @@
   <!-- ================= RENDA ================= -->
   <section class="input-section">
     <h2>💼 Renda do Mês</h2>
-
     <div class="form">
       <input id="rendaPrincipal" type="number" placeholder="Renda principal">
       <button onclick="salvarRendaPrincipal()">Salvar Renda</button>
     </div>
 
     <h3 style="margin-top:1rem;">➕ Rendas Extras</h3>
-
     <div class="form">
       <input id="descricaoRendaExtra" placeholder="Descrição da renda extra">
       <input id="valorRendaExtra" type="number" placeholder="Valor">
@@ -73,90 +68,41 @@
   <!-- ================= CADASTRO DE CARTÕES ================= -->
   <section class="input-section">
     <h2>💳 Cadastro de Cartões</h2>
-
     <div class="form">
       <input id="cartaoNome" placeholder="Nome do cartão">
       <input id="cartaoFechamento" type="number" min="1" max="31" placeholder="Dia de fechamento">
       <input id="cartaoVencimento" type="number" min="1" max="31" placeholder="Dia de vencimento">
       <button onclick="salvarCartao()">Salvar Cartão</button>
     </div>
-
     <ul id="listaCartoes"></ul>
   </section>
 
-  <!-- ================= LANÇAMENTO NORMAL ================= -->
+  <!-- ================= ASSINATURAS ================= -->
   <section class="input-section">
-    <h2>➕ Lançamento Manual</h2>
-
+    <h2>🔁 Assinaturas de Plataforma</h2>
     <div class="form">
-      <select id="tipoLancamento">
-        <option value="Renda">Renda</option>
-        <option value="Gasto">Gasto</option>
-        <option value="Investimento">Investimento</option>
-        <option value="Saúde">Saúde</option>
-      </select>
-
-      <input id="categoriaLancamento" placeholder="Categoria">
-      <input id="descricaoLancamento" placeholder="Descrição">
-      <input id="valorLancamento" type="number" step="0.01" placeholder="Valor">
-
-      <button onclick="
-        salvarLancamentoNormal(
-          tipoLancamento.value,
-          categoriaLancamento.value,
-          descricaoLancamento.value,
-          +valorLancamento.value
-        )
-      ">
-        Salvar Lançamento
-      </button>
+      <input id="assinaturaDescricao" placeholder="Descrição (Netflix, Spotify...)">
+      <input id="assinaturaValor" type="number" step="0.01" placeholder="Valor mensal">
+      <select id="assinaturaCartao"></select>
+      <button onclick="salvarAssinatura()">Salvar Assinatura</button>
     </div>
+    <ul id="listaAssinaturas"></ul>
   </section>
 
-  <!-- ================= COMPRA PARCELADA ================= -->
-  <section class="input-section">
-    <h2>🛒 Compra no Cartão (Parcelada)</h2>
-
-    <div class="form">
-      <select id="compraCartao"></select>
-      <input id="compraDescricao" placeholder="Descrição da compra">
-      <input id="compraValor" type="number" placeholder="Valor total">
-      <input id="compraParcelas" type="number" placeholder="Parcelas">
-      <input id="compraMes" type="number" min="1" max="12" placeholder="Mês 1ª parcela">
-      <input id="compraAno" type="number" placeholder="Ano 1ª parcela">
-
-      <button onclick="
-        registrarCompraParcelada(
-          compraCartao.value,
-          compraDescricao.value,
-          +compraValor.value,
-          +compraParcelas.value,
-          +compraMes.value,
-          +compraAno.value
-        )
-      ">
-        Registrar Compra
-      </button>
-    </div>
-  </section>
-
-  <!-- ================= RESUMO ================= -->
+  <!-- ================= DASHBOARD ================= -->
   <section class="cards">
     <div class="card blue">
       <h3>💼 Renda</h3>
       <p id="rendaEl">R$ 0,00</p>
     </div>
-
     <div class="card yellow">
       <h3>💛 Renda Extra</h3>
       <p id="rendaExtraEl">R$ 0,00</p>
     </div>
-
     <div class="card red">
       <h3>💸 Gastos</h3>
       <p id="gastosEl">R$ 0,00</p>
     </div>
-
     <div class="card green">
       <h3>💰 Sobra</h3>
       <p id="sobraEl">R$ 0,00</p>
@@ -168,70 +114,25 @@
     <div class="chart-box">
       <canvas id="barChart" width="360" height="260"></canvas>
     </div>
-
     <div class="chart-box">
       <canvas id="pieChart" width="360" height="260"></canvas>
     </div>
   </section>
 
-  <!-- ================= DASHBOARD DE CARTÕES ================= -->
+  <!-- ================= GRÁFICO ASSINATURAS ================= -->
   <section class="input-section">
-    <h2>📊 Dashboard de Cartões</h2>
-
-    <select id="cartaoDashboard">
-      <option value="">Todos os cartões</option>
-    </select>
-
+    <h2>📊 Assinaturas x Renda</h2>
     <div class="charts">
       <div class="chart-box">
-        <canvas id="cartaoChart" width="360" height="260"></canvas>
+        <canvas id="assinaturaChart" width="360" height="260"></canvas>
       </div>
     </div>
-  </section>
-
-  <!-- ================= FATURA MENSAL ================= -->
-  <section class="input-section">
-    <h2>📆 Fatura Mensal do Cartão</h2>
-
-    <div class="form">
-      <select id="faturaCartao"></select>
-      <select id="faturaMes">
-        <option value="1">Janeiro</option>
-        <option value="2">Fevereiro</option>
-        <option value="3">Março</option>
-        <option value="4">Abril</option>
-        <option value="5">Maio</option>
-        <option value="6">Junho</option>
-        <option value="7">Julho</option>
-        <option value="8">Agosto</option>
-        <option value="9">Setembro</option>
-        <option value="10">Outubro</option>
-        <option value="11">Novembro</option>
-        <option value="12">Dezembro</option>
-      </select>
-
-      <input id="faturaAno" type="number" placeholder="Ano">
-      <button onclick="renderFatura()">Ver Fatura</button>
-    </div>
-
-    <h3 id="totalFatura">Total: R$ 0,00</h3>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Descrição</th>
-          <th>Parcela</th>
-          <th>Valor</th>
-        </tr>
-      </thead>
-      <tbody id="tabelaFatura"></tbody>
-    </table>
+    <div id="impactoAssinaturas" style="margin-top:1rem;font-weight:600;"></div>
   </section>
 
   <!-- ================= LANÇAMENTOS ================= -->
   <section class="tabela">
     <h2>📋 Lançamentos do Mês</h2>
-
     <table>
       <thead>
         <tr>
@@ -245,14 +146,6 @@
       </thead>
       <tbody id="tabela"></tbody>
     </table>
-  </section>
-
-  <!-- ================= BACKUP ================= -->
-  <section class="backup">
-    <h2>💾 Backup dos Cartões</h2>
-    <button onclick="exportarBackup()">⬇️ Exportar Cartões</button>
-    <input type="file" id="importFile" accept=".json">
-    <button onclick="importarBackup()">⬆️ Importar Cartões</button>
   </section>
 
 </main>
