@@ -141,9 +141,10 @@ button:hover {
 }
 
 /* =====================================================
-   LISTA DE CARTÕES
+   LISTAS
 ===================================================== */
-#listaCartoes {
+#listaCartoes,
+#listaRendasExtras {
   list-style: none;
   margin-top: 1rem;
 }
@@ -156,22 +157,29 @@ button:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.95rem;
+}
+
+#listaRendasExtras li {
+  background: #fefcbf;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 /* =====================================================
-   CARDS DE RESUMO
+   CARDS DASHBOARD
 ===================================================== */
 .cards {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 20px;
   margin: 2.5rem 0;
-  flex-wrap: wrap;
 }
 
 .card {
-  flex: 1;
-  min-width: 260px;
   padding: 1.6rem;
   border-radius: 18px;
   color: #fff;
@@ -180,21 +188,34 @@ button:hover {
 }
 
 .card h3 {
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.05rem;
+  margin-bottom: 0.4rem;
 }
 
 .card p {
-  font-size: 1.9rem;
+  font-size: 1.8rem;
   font-weight: bold;
 }
 
-.green { background: linear-gradient(135deg, #38a169, #2f855a); }
-.red   { background: linear-gradient(135deg, #e53e3e, #c53030); }
-.blue  { background: linear-gradient(135deg, #3182ce, #2563eb); }
+.blue {
+  background: linear-gradient(135deg, #3182ce, #2563eb);
+}
+
+.yellow {
+  background: linear-gradient(135deg, #ecc94b, #d69e2e);
+  color: #1f2937;
+}
+
+.red {
+  background: linear-gradient(135deg, #e53e3e, #c53030);
+}
+
+.green {
+  background: linear-gradient(135deg, #38a169, #2f855a);
+}
 
 /* =====================================================
-   GRÁFICOS (PADRONIZADOS)
+   GRÁFICOS
 ===================================================== */
 .charts {
   display: flex;
@@ -304,6 +325,10 @@ body.dark #listaCartoes li {
   background: #020617;
 }
 
+body.dark #listaRendasExtras li {
+  background: #3f3f1f;
+}
+
 body.dark tbody tr:hover {
   background: #111827;
 }
@@ -314,10 +339,6 @@ body.dark tbody tr:hover {
 @media (max-width: 768px) {
   header h1 {
     font-size: 1.6rem;
-  }
-
-  .cards {
-    flex-direction: column;
   }
 
   .charts {
