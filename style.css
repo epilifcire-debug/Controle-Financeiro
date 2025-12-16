@@ -278,40 +278,75 @@ footer {
 }
 
 /* =====================================================
-   MODO ESCURO — CARDS MAIS ACESOS
+   DARK MODE — VISUAL PREMIUM
 ===================================================== */
+body.dark {
+  background: #020617;
+  color: #e5e7eb;
+}
 
-/* Cards principais */
+body.dark header,
+body.dark footer {
+  background: linear-gradient(135deg, #020617, #020617);
+}
+
+body.dark .input-section,
+body.dark .tabela,
+body.dark .backup {
+  background: #0f172a;
+  border: 1px solid #334155;
+}
+
 body.dark .card {
-  background: #334155;            /* cinza mais claro */
-  color: #f9fafb;
-  border: 1px solid #475569;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.7);
 }
 
-/* Card renda extra continua amarelo */
-body.dark .card.yellow {
-  background: #facc15;
-  color: #020617;
-  border: 1px solid #eab308;
-}
-
-/* =====================================================
-   MODO ESCURO — GRÁFICOS MAIS VISÍVEIS
-===================================================== */
-
-/* Caixa dos gráficos */
 body.dark .chart-box {
-  background: #f8fafc;            /* quase branco */
-  border: 2px solid #334155;      /* separação clara */
-  box-shadow: 0 12px 32px rgba(0,0,0,0.9);
+  background: #0f172a;
+  border: 1px solid #334155;
+  box-shadow: 0 16px 36px rgba(0,0,0,0.7);
 }
 
-/* Títulos dentro das seções */
-body.dark .input-section h2,
-body.dark .tabela h2,
-body.dark .backup h2 {
-  color: #93c5fd;                 /* azul claro */
+body.dark table thead {
+  background: #1e293b;
+}
+
+body.dark tbody tr {
+  border-bottom: 1px solid #334155;
+}
+
+body.dark tbody tr:hover {
+  background: #1e293b;
+}
+
+body.dark .form input,
+body.dark .form select,
+body.dark .form input[type="file"] {
+  background: #020617;
+  color: #e5e7eb;
+  border-color: #334155;
+}
+
+body.dark button {
+  box-shadow: 0 8px 22px rgba(0,0,0,0.7);
+}
+
+body.dark .card.blue {
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+}
+
+body.dark .card.yellow {
+  background: linear-gradient(135deg, #fde047, #eab308);
+  color: #1f2937;
+}
+
+body.dark .card.red {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+}
+
+body.dark .card.green {
+  background: linear-gradient(135deg, #22c55e, #15803d);
 }
 
 /* =====================================================
@@ -356,5 +391,6 @@ body.dark li {
     font-size: 0.85rem;
   }
 }
+
 
 
